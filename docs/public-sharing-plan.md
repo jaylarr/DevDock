@@ -3,7 +3,7 @@
 Date: 2026-10-02 (Asia/Taipei)  
 Status: **Implementation and generated-fixture public testing approved by the user's “Yes, you can proceed” on 2026-10-02. Implemented locally as v0.3.0; see `docs/public-sharing.md` for evidence and limits. Independent visitor-network verification remains pending.**
 
-This feature expands section 97 of `plan.md` into an implementation plan for the current Local Dev Manager. The user requested temporary internet access for several running projects, including plain HTML, with access for anyone who has the generated link. That access mode is already established; the remaining decisions are recorded below.
+This feature expands section 97 of `plan.md` into an implementation plan for the current DevDock. The user requested temporary internet access for several running projects, including plain HTML, with access for anyone who has the generated link. That access mode is already established; the remaining decisions are recorded below.
 
 ## 1. Current stage and goal
 

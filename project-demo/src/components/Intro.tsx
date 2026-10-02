@@ -25,7 +25,7 @@ export const Intro: React.FC = () => {
         <div style={{ width: 82, height: 82, display: 'grid', placeItems: 'center', borderRadius: 7, background: '#eeeef0', color: '#19191c', fontSize: 52 }}>⌘</div>
         <span style={{ color: '#aaaab2', fontSize: 18, letterSpacing: 3 }}>ONE PLACE TO RUN YOUR PROJECTS</span>
       </div>
-      <div style={{ fontSize: 106, fontWeight: 600, letterSpacing: -5 }}>Local Dev Manager.</div>
+      <div style={{ fontSize: 106, fontWeight: 600, letterSpacing: -5 }}>DevDock.</div>
       <div style={{ fontSize: 34, color: '#aaaab2', marginTop: 27 }}>Discover. Start. Inspect.</div>
     </div>
   </AbsoluteFill>;

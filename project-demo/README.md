@@ -1,4 +1,4 @@
-# Local Dev Manager montage
+# DevDock montage
 
 A repeatable **60-second advertising cut, LOCALHOST: LEVEL UP**, showing the actual Electron app. Named output: **`project-demo/output/project-montage-level-up.mp4`**, H.264/AAC, 1920 × 1080, 30 FPS, with burned-in sentence subtitles. The capture source is about 25 FPS, so rendering 60 FPS would primarily duplicate frames.
 

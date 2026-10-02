@@ -1,4 +1,4 @@
-# Local Dev Manager
+# DevDock
 
 ## 0. Review Status and Agreed Constraints
 
@@ -43,7 +43,7 @@ The implementation should proceed by milestones after final approval, with a rev
 
 ## 1. Project Overview
 
-Build a local desktop application called **Local Dev Manager** that acts as a centralized control panel for development projects stored across one or more folders on the user's computer.
+Build a local desktop application called **DevDock** that acts as a centralized control panel for development projects stored across one or more folders on the user's computer.
 
 The application should automatically discover development projects that contain a runnable `dev` script, display them in a dashboard, and allow the user to start, stop, restart, inspect, and open those projects without manually opening VS Code terminals and running commands individually.
 
@@ -97,12 +97,12 @@ Currently, starting projects requires:
 7. Handle duplicate ports manually.
 8. Keep many terminals open.
 
-Local Dev Manager should replace this workflow.
+DevDock should replace this workflow.
 
 The desired workflow is:
 
 ```text
-Open Local Dev Manager
+Open DevDock
 
 ↓
 
@@ -951,7 +951,7 @@ Ensure stopping Next.js/Vite does not leave zombie processes.
 
 # 20. Application Shutdown Cleanup
 
-When Local Dev Manager closes, stop all tunnels and project processes launched by Local Dev Manager. Stop tunnels before their associated servers, await bounded cleanup, and report failures.
+When DevDock closes, stop all tunnels and project processes launched by DevDock. Stop tunnels before their associated servers, await bounded cleanup, and report failures.
 
 Before quit:
 
@@ -1285,7 +1285,7 @@ Recommended layout:
 
 ```text
 ┌───────────────────────────────────────────────┐
-│ Local Dev Manager                     Settings│
+│ DevDock                     Settings│
 ├─────────────┬─────────────────────────────────┤
 │             │ Search projects...              │
 │ All         │                                 │
@@ -1922,7 +1922,7 @@ If no roots exist:
 Display:
 
 ```text
-Welcome to Local Dev Manager
+Welcome to DevDock
 
 Manage all your local development projects
 from one place.
@@ -3232,7 +3232,7 @@ Redis
 PostgreSQL
 ```
 
-Eventually Local Dev Manager could become a complete:
+Eventually DevDock could become a complete:
 
 ```text
 Local Development Control Center
@@ -3294,7 +3294,7 @@ or the final commands selected by the project.
 
 The README introduction should explain the application roughly as:
 
-Local Dev Manager is a desktop control center for local development projects. Select the folders where your projects live, automatically discover applications with development scripts, and start, stop, restart, open, and inspect them from one dashboard.
+DevDock is a desktop control center for local development projects. Select the folders where your projects live, automatically discover applications with development scripts, and start, stop, restart, open, and inspect them from one dashboard.
 
 It provides conflict-free local project URLs and eliminates the need to manually open multiple terminals just to launch development servers.
 
@@ -3325,7 +3325,7 @@ repeat
 After:
 
 ```text
-Open Local Dev Manager
+Open DevDock
 
 Click Start
 

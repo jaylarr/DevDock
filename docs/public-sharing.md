@@ -1,4 +1,4 @@
-# Public previews in Local Dev Manager v0.3.0
+# Public previews in DevDock v0.3.0
 
 Prepared: 2026-10-02 (Asia/Taipei). Local release draft; publication and packaging are separate.
 

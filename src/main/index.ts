@@ -8,7 +8,10 @@ import { localOrigin } from './services/processManager';
 import { within } from './services/identity';
 import { sharingCompatibility } from './services/sharingCompatibility';
 
-app.setName('Local Dev Manager');
+// Keep the existing data directory when changing the product name.
+const legacyUserData = path.join(app.getPath('appData'), 'Local Dev Manager');
+app.setName('DevDock');
+app.setPath('userData', legacyUserData);
 if (process.env.LDM_DATA_DIR) app.setPath('userData', path.resolve(process.env.LDM_DATA_DIR));
 protocol.registerSchemesAsPrivileged([{ scheme: 'ldm', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }]);
 let window: BrowserWindow | undefined;
@@ -101,7 +104,7 @@ else {
     });
     await service.initialize();
     window = new BrowserWindow({ width: 1220, height: 800, minWidth: 850, minHeight: 600, show: false,
-      backgroundColor: '#f4f5f1', title: 'Local Dev Manager', autoHideMenuBar: true,
+      backgroundColor: '#f4f5f1', title: 'DevDock', autoHideMenuBar: true,
       webPreferences: { preload: path.resolve(__dirname, '../preload/index.cjs'), contextIsolation: true,
         nodeIntegration: false, sandbox: true, webSecurity: true, webviewTag: false } });
     const session = window.webContents.session;
@@ -119,7 +122,7 @@ else {
     window.once('ready-to-show', () => window?.show());
     await window.loadURL(rendererUrl);
     void service.scan().catch((error: unknown) => dialog.showErrorBox('Scan failed', error instanceof Error ? error.message : 'Could not scan folders.'));
-  }).catch((error: unknown) => { dialog.showErrorBox('Local Dev Manager could not start', error instanceof Error ? error.message : 'Unknown startup error.'); app.exit(1); });
+  }).catch((error: unknown) => { dialog.showErrorBox('DevDock could not start', error instanceof Error ? error.message : 'Unknown startup error.'); app.exit(1); });
   app.on('before-quit', (event) => {
     if (approvedQuit) return;
     event.preventDefault();

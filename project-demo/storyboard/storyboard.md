@@ -4,7 +4,7 @@ A 60-second 1920 x 1080, 30 FPS advertising cut for casual developers and side-p
 
 The full creative treatment is [creative-ad-script.md](../../docs/showcase/creative-ad-script.md). Spoken copy is [narration-script.md](narration-script.md).
 
-| 00-09s | intro | Another side project. Another terminal. Wait... which port was that? Meet Local Dev Manager. Your localhost just leveled up. |
+| 00-09s | intro | Another side project. Another terminal. Wait... which port was that? Meet DevDock. Your localhost just leveled up. |
 | 09-16s | 01-discovery | Add your project folders. Bring your side projects into one dashboard. |
 | 16-24s | 02-start | Hit Start. Open your app. Stop or restart when you need to. |
 | 24-30s | 07-html | Even that tiny HTML experiment gets its own local preview. |
@@ -12,7 +12,7 @@ The full creative treatment is [creative-ad-script.md](../../docs/showcase/creat
 | 33-37s | 04-focus | Find your project. Filter the ones running now. |
 | 37-47s | 05-preview | Want a second opinion? Use optional sharing for a temporary public preview. Review access before sharing. |
 | 47-54s | 06-theme | Light mode. Dark mode. Local controls, with no app account needed. |
-| 54-60s | outro | Less terminal juggling. More building. Meet Local Dev Manager. |
+| 54-60s | outro | Less terminal juggling. More building. Meet DevDock. |
 
 ## Capture evidence
 

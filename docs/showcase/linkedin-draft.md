@@ -1,6 +1,6 @@
 # LinkedIn draft
 
-I built Local Dev Manager to reduce the repetitive setup involved in switching between local development projects.
+I built DevDock to reduce the repetitive setup involved in switching between local development projects.
 
 It's a Windows desktop dashboard where you register project folders, discover supported applications, and manage their local servers from one place.
 

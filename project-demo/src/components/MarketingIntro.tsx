@@ -40,7 +40,7 @@ export const Intro: React.FC = () => {
         <div style={{ width: 80, height: 80, display: 'grid', placeItems: 'center', borderRadius: 20, color: '#10231e', background: '#b8dec8', fontSize: 48, boxShadow: '0 0 80px #b8dec825', transform: `rotate(${(1 - identity) * -18}deg)` }}>⌘</div>
         <span style={{ fontSize: 17, letterSpacing: 3, color: '#b5c4cf' }}>ONE PLACE. EVERY PROJECT.</span>
       </div>
-      <div style={{ fontSize: 110, fontWeight: 650, letterSpacing: -5 }}>Local Dev Manager<span style={{ color: '#b8dec8' }}>.</span></div>
+      <div style={{ fontSize: 110, fontWeight: 650, letterSpacing: -5 }}>DevDock<span style={{ color: '#b8dec8' }}>.</span></div>
       <div style={{ display: 'flex', gap: 18, marginTop: 40 }}>
         {['Discover', 'Start', 'Inspect'].map((text, i) => {
           const enter = spring({ frame: frame - 68 - i * 6, fps, config: { damping: 24 } });

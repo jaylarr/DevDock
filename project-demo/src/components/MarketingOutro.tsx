@@ -14,7 +14,7 @@ export const Outro: React.FC = () => {
       <div style={{ fontSize: 64, letterSpacing: -2, color: '#9eacb9' }}>Less terminal juggling.</div>
       <div style={{ fontSize: 150, fontWeight: 650, letterSpacing: -7, marginTop: 3, opacity: second, transform: `translateY(${(1 - second) * 35}px)` }}>More <span style={{ color: '#b8dec8' }}>building.</span></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginTop: 52, fontSize: 36, fontWeight: 600 }}>
-        <span style={{ display: 'grid', placeItems: 'center', width: 56, height: 56, background: '#b8dec8', color: '#152720', borderRadius: 14, fontSize: 36 }}>⌘</span>Local Dev Manager.
+        <span style={{ display: 'grid', placeItems: 'center', width: 56, height: 56, background: '#b8dec8', color: '#152720', borderRadius: 14, fontSize: 36 }}>⌘</span>DevDock.
       </div>
       <div style={{ display: 'flex', gap: 12, marginTop: 30 }}>
         {['Electron', 'React', 'TypeScript', 'Vite'].map((text, i) => {

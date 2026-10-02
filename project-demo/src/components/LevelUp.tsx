@@ -25,7 +25,7 @@ export const AdBackdrop: React.FC<{ hero?: boolean }> = ({ hero = false }) => {
 
 const Pill: React.FC<{ children: React.ReactNode; color?: string }> = ({ children, color = C.mint }) => <div style={{ padding: '11px 18px', color, background: `${color}0c`, border: `1px solid ${color}42`, borderRadius: 40, fontSize: 19, display: 'flex', gap: 10, alignItems: 'center' }}>{children}</div>;
 
-const Screen: React.FC<{ children: React.ReactNode; label?: string; width: number; style?: React.CSSProperties }> = ({ children, label = 'LOCAL DEV MANAGER', width, style }) => <div style={{ width, borderRadius: 18, overflow: 'hidden', border: '1px solid #b9a3ff55', background: '#182032', boxShadow: '0 35px 100px #0007,0 0 55px #a39aff0b', ...style }}>
+const Screen: React.FC<{ children: React.ReactNode; label?: string; width: number; style?: React.CSSProperties }> = ({ children, label = 'DEVDOCK', width, style }) => <div style={{ width, borderRadius: 18, overflow: 'hidden', border: '1px solid #b9a3ff55', background: '#182032', boxShadow: '0 35px 100px #0007,0 0 55px #a39aff0b', ...style }}>
   <div style={{ height: 32, padding: '0 16px', display: 'flex', alignItems: 'center', gap: 7, borderBottom: '1px solid #39425a' }}>
     {[C.mint, C.violet, '#56647d'].map(c => <span key={c} style={{ width: 7, height: 7, borderRadius: 7, background: c }} />)}
     <span style={{ marginLeft: 12, fontSize: 11, letterSpacing: 1.8, color: '#abb9d0' }}>{label}</span>
@@ -56,7 +56,7 @@ export const LevelUpIntro: React.FC = () => {
       </div>;
     })}
     <div style={{ position: 'absolute', left: 120, top: 247, width: 850, opacity: reveal, transform: `translateY(${(1 - reveal) * 55}px)` }}>
-      <div style={{ color: C.violet, fontSize: 22, letterSpacing: 5, marginBottom: 28 }}>MEET LOCAL DEV MANAGER</div>
+      <div style={{ color: C.violet, fontSize: 22, letterSpacing: 5, marginBottom: 28 }}>MEET DEVDOCK</div>
       <div style={{ fontSize: 102, lineHeight: 1.02, letterSpacing: -5, fontWeight: 750 }}>LOCALHOST:</div>
       <div style={{ fontSize: 154, lineHeight: 1.04, letterSpacing: -8, fontWeight: 800, color: C.mint }}>LEVEL UP<span style={{ color: C.violet }}>↗</span></div>
       <div style={{ marginTop: 30, fontSize: 29, color: '#bdc9dc' }}>Your projects. One dashboard.</div>
@@ -116,7 +116,7 @@ export const LevelUpOutro: React.FC = () => {
     <div style={{ position: 'absolute', left: 120, top: 252, opacity: enter, transform: `translateY(${(1 - enter) * 45}px)` }}>
       <div style={{ fontSize: 42, color: C.dim, letterSpacing: -1 }}>Less terminal juggling.</div>
       <div style={{ fontSize: 127, lineHeight: 1.03, fontWeight: 750, letterSpacing: -6, marginTop: 22, color: C.mint }}>More<br />building<span style={{ color: C.violet }}>.</span></div>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 39, fontSize: 37, fontWeight: 650 }}><span style={{ display: 'grid', placeItems: 'center', background: C.mint, color: '#11271d', borderRadius: 16, width: 62, height: 62, fontSize: 41 }}>⌘</span>Local Dev Manager</div>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginTop: 39, fontSize: 37, fontWeight: 650 }}><span style={{ display: 'grid', placeItems: 'center', background: C.mint, color: '#11271d', borderRadius: 16, width: 62, height: 62, fontSize: 41 }}>⌘</span>DevDock</div>
       <div style={{ marginTop: 27, color: '#b8c5da', fontSize: 26 }}>Your projects. One dashboard. More building.</div>
     </div>
     <div style={{ position: 'absolute', left: 1040, top: 205, opacity: easing(f, 12), transform: `perspective(1200px) rotateY(-7deg) rotateZ(-4deg) translateY(${Math.sin(f / 28) * 5}px)` }}>

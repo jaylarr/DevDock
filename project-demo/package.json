@@ -1,5 +1,5 @@
 {
-  "name": "local-dev-manager-montage",
+  "name": "devdock-montage",
   "private": true,
   "type": "module",
   "scripts": {

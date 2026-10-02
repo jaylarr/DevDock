@@ -12,7 +12,7 @@ export function fixturePage(name) {
   .card b{color:#d7e2f1;font-size:18px}.card p{font-size:15px;margin:10px 0 0}footer{color:#7e90aa;margin-top:24px;font-size:12px;letter-spacing:2px}
   </style><nav><b>${name.toUpperCase()}</b><span class="pill">Fictional demonstration project</span></nav>
   <div class="hero"><div><small>SMALL PROJECT. BIG POSSIBILITY.</small><h1>${name==='canvas-studio'?'Make something<br>just for fun.':'Your next idea<br>starts here.'}</h1>
-  <p>A colorful little ${name==='canvas-studio'?'HTML experiment':'development playground'}, served locally by Local Dev Manager.</p><div class="cta">Keep creating ↗</div></div>
+  <p>A colorful little ${name==='canvas-studio'?'HTML experiment':'development playground'}, served locally by DevDock.</p><div class="cta">Keep creating ↗</div></div>
   <div class="art"><div class="ring"></div><div class="ring"></div><div class="orb"></div></div></div>
   <div class="cards"><div class="card"><b>Explore an idea</b><p>Start with something small.</p></div><div class="card"><b>Make it yours</b><p>Try a color. Change a shape.</p></div><div class="card"><b>Enjoy the process</b><p>Your next side project can begin here.</p></div></div>
   <footer>REAL LOCAL PREVIEW · FICTIONAL DEMO CONTENT</footer></html>`;

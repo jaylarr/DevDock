@@ -1,6 +1,6 @@
 # LOCALHOST: LEVEL UP
 
-Creative advertising script for Local Dev Manager. Prepared 2026-10-03 (Asia/Taipei).
+Creative advertising script for DevDock. Prepared 2026-10-03 (Asia/Taipei).
 
 Status: implemented as a local 60-second Remotion ad at `project-demo/output/project-montage-level-up.mp4`, with voice-over, burned-in captions, external SRT, original music and synthesized effects. The earlier marketing cut is preserved as `project-montage-marketing-r3.mp4`. Nothing was published.
 
@@ -8,7 +8,7 @@ Status: implemented as a local 60-second Remotion ad at `project-demo/output/pro
 
 **Ad title:** LOCALHOST: LEVEL UP
 
-**Product name:** Local Dev Manager
+**Product name:** DevDock
 
 **Tagline:** Your projects. One dashboard. More building.
 
@@ -35,20 +35,20 @@ Spoken copy below is also the source for subtitles. Timing is an editorial targe
 | Time | Voice-over | Visual action and headline | Motion, hover, and sound |
 | --- | --- | --- | --- |
 | 00-05 | Another side project. Another terminal. Wait... which port was that? | Three illustrated terminal windows overlap, each with a fictional project name. Headline: TOO MANY TABS. TOO LITTLE FLOW. | Windows pop in on three taps. Cursor searches between them. A brief wobble and soft error bloop land on the question; music starts as a filtered pulse. |
-| 05-09 | Meet Local Dev Manager. Your localhost just leveled up. | Windows fold into the real dashboard. Product name appears beneath LOCALHOST: LEVEL UP. | Perspective collapse, title spring, mint light sweep. Bass enters with a soft impact; avoid a loud cinematic boom. |
+| 05-09 | Meet DevDock. Your localhost just leveled up. | Windows fold into the real dashboard. Product name appears beneath LOCALHOST: LEVEL UP. | Perspective collapse, title spring, mint light sweep. Bass enters with a soft impact; avoid a loud cinematic boom. |
 | 09-16 | Add your project folders. Bring your side projects into one dashboard. | Real folder discovery. Headline: SIDE PROJECTS. SAME WORKSPACE. | Smooth cursor approach; editorial halo around Add folder. Rows reveal with short staggered masks after actual discovery. Folder click and small row ticks. |
 | 16-24 | Hit Start. Open your app. Stop or restart when you need to. | Start one real npm fixture, show Starting then verified Running, open its local page; cut back to Stop/Restart controls. Headline: CLICK. RUN. BUILD. | Cursor slows over Start; editorial 1.03x button magnification and click ripple. Green accent appears only after real Running. Readiness chime; browser card slides forward. Label condensed startup waits. |
 | 24-30 | Even that tiny HTML experiment gets its own local preview. | Select and open a real standalone HTML fixture. Headline: YES, EVEN PLAIN HTML. | HTML tag flips into a browser frame. Hover spotlight follows Open. Paper flick and soft click. Show a simple colorful demo page. |
 | 30-37 | Check live logs. Find your project. Filter the ones running now. | Expand real output, then search a fictional project and choose Active. Headlines change in sequence: SEE THE OUTPUT / FIND YOUR FLOW. | Logs slide open; one actual output line gets an editorial underline. Cursor halo moves to search. Quiet typing clicks; row reflow lands on the beat. |
 | 37-47 | Want a second opinion? Use optional sharing for a temporary public preview. Review access before sharing. | Show real Share Online dialog and its access/compatibility copy. Headline: LOCAL PROJECT. PUBLIC PEEK. Secondary text: Temporary HTTPS preview. | Hover glow around Share Online, then camera settles so the notice can be read. An editorial connection line moves toward a browser icon. Airy whoosh and two-note link sound. Persistent label: Confirmation demo - no live tunnel. Cancel at the end of capture. |
 | 47-54 | Light mode. Dark mode. Local controls, with no app account needed. | Switch the actual theme. Hold the attractive dashboard with real running fixtures. Headline: YOUR WORKSPACE. YOUR VIBE. | A diagonal light-to-dark wipe follows the real toggle. Project cards have a subtle editorial depth shift. Toggle tick; synth pad opens up. |
-| 54-60 | Less terminal juggling. More building. Meet Local Dev Manager. | Hero dashboard settles behind the title. End card: LOCALHOST: LEVEL UP / Local Dev Manager / Your projects. One dashboard. More building. Visible badge: Windows source-build preview. | Cursor clicks an editorial play icon; letters land in three beats. Resolve music to a short tail and clean final hold. No download button or repository link until a real destination exists. |
+| 54-60 | Less terminal juggling. More building. Meet DevDock. | Hero dashboard settles behind the title. End card: LOCALHOST: LEVEL UP / DevDock / Your projects. One dashboard. More building. Visible badge: Windows source-build preview. | Cursor clicks an editorial play icon; letters land in three beats. Resolve music to a short tail and clean final hold. No download button or repository link until a real destination exists. |
 
 ## Continuous narration
 
 Another side project. Another terminal. Wait... which port was that?
 
-Meet Local Dev Manager. Your localhost just leveled up.
+Meet DevDock. Your localhost just leveled up.
 
 Add your project folders. Bring your side projects into one dashboard.
 
@@ -62,7 +62,7 @@ Want a second opinion? Use optional sharing for a temporary public preview. Revi
 
 Light mode. Dark mode. Local controls, with no app account needed.
 
-Less terminal juggling. More building. Meet Local Dev Manager.
+Less terminal juggling. More building. Meet DevDock.
 
 ## Production direction
 

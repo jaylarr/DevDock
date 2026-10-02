@@ -1,6 +1,6 @@
 # Facebook draft
 
-I built Local Dev Manager to make switching between local development projects a little easier.
+I built DevDock to make switching between local development projects a little easier.
 
 Instead of opening a terminal for every project, I can add my project folders and manage their servers from one dashboard: start, stop, restart, open in the browser, and check live logs.
 

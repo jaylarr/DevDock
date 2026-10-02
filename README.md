@@ -1,10 +1,12 @@
-# Local Dev Manager
+# DevDock
+
+Your local projects. One dock.
 
 A desktop dashboard for finding, starting, stopping, and inspecting local development projects. Add the folders where your projects live, then manage their development servers from one window.
 
 **v0.3.0 is a Windows source-build preview. macOS and Linux are currently unsupported. An installer is not available.** Public release preparation is in progress; see the [publication audit](docs/publication-audit.md) for remaining work and tested limits.
 
-![Local Dev Manager with fictional demo projects](docs/media/01-dashboard-light.png)
+![DevDock with fictional demo projects](docs/media/01-dashboard-light.png)
 
 *Screenshot: fictional projects in the real Windows app. Demo paths are displayed as `C:\Demo Projects` for privacy.*
 
@@ -27,7 +29,7 @@ A desktop dashboard for finding, starting, stopping, and inspecting local develo
 
 ## What it does
 
-Local Dev Manager is for developers who switch between several local websites or apps and want to avoid opening a separate terminal for every server.
+DevDock is for developers who switch between several local websites or apps and want to avoid opening a separate terminal for every server.
 
 - Register multiple root folders and discover their projects without executing scripts during scanning.
 - Start, stop, restart, and open supported projects in your default browser.
@@ -91,7 +93,7 @@ npm.cmd start
 | `npm.cmd start` | Launch the compiled desktop app; does not download a runtime |
 | `npm.cmd run setup:sharing` | Optional: download and checksum-verify the pinned Windows x64 sharing runtime |
 
-A window titled **Local Dev Manager** should open. Choose **Add folder** to begin. Keep this source folder and its dependencies available: `dist/` alone is not an installation package.
+A window titled **DevDock** should open. Choose **Add folder** to begin. Keep this source folder and its dependencies available: `dist/` alone is not an installation package.
 
 ### Optional sharing setup
 

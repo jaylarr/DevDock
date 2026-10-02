@@ -1,5 +1,5 @@
 {
-  "name": "local-dev-manager",
+  "name": "devdock",
   "version": "0.3.0",
   "private": true,
   "description": "Offline desktop controls for local development projects.",
