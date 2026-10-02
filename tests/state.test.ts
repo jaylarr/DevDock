@@ -1,0 +1,50 @@
+import { afterEach, expect, it } from 'vitest';
+import { readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { Persistence, emptyState } from '../src/main/services/persistence';
+import { AppService } from '../src/main/services/appService';
+import { LogManager } from '../src/main/services/logManager';
+import { dispose, fixtureDirectory, packageFile, root } from './helpers';
+
+const fixtures: string[] = [];
+afterEach(async () => { for (const directory of fixtures.splice(0)) await dispose(directory); });
+it('serializes concurrent atomic saves and recovers a damaged primary from backup', async () => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const persistence = new Persistence(directory);
+  const initial = { ...emptyState(), roots: [root(directory)] };
+  await persistence.save(initial);
+  await Promise.all([persistence.save({ ...initial, theme: 'dark' }), persistence.save({ ...initial, theme: 'light' })]);
+  expect((await persistence.load()).state.theme).toBe('light');
+  await writeFile(persistence.file, 'invalid json');
+  const restored = await persistence.load();
+  expect(restored.state.theme).toBe('dark'); expect(restored.warning).toContain('Recovered');
+  await persistence.save(restored.state);
+  await writeFile(persistence.file, 'damaged again');
+  expect((await persistence.load()).state.theme).toBe('dark');
+});
+it('keeps roots and cached metadata across launches, resets runtime, and retains missing projects', async () => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const projects = path.join(directory, 'projects');
+  await packageFile(path.join(projects, 'web'), { scripts: { dev: 'node server.js' } });
+  const persistence = new Persistence(path.join(directory, 'state'));
+  const first = new AppService(persistence, () => {}); await first.initialize(); await first.addRoot(projects);
+  expect(first.snapshot().projects).toHaveLength(1);
+  await expect(first.addRoot(projects)).rejects.toThrow('already registered');
+  const second = new AppService(persistence, () => {}); await second.initialize();
+  expect(second.snapshot().roots[0]?.path).toBe(projects);
+  expect(second.snapshot().projects[0]?.status).toBe('stopped');
+  await writeFile(path.join(projects, 'web/package.json'), JSON.stringify({ scripts: {} }));
+  await second.scan(); expect(second.snapshot().projects[0]?.missing).toBe(true);
+  await second.removeRoot(second.snapshot().roots[0]!.id);
+  expect(second.snapshot().projects).toEqual([]);
+  expect(await readFile(path.join(projects, 'web/package.json'), 'utf8')).toContain('scripts');
+});
+it('bounds logs by lines, bytes and global budget while stripping ANSI control sequences', () => {
+  const logs = new LogManager(() => {}, 3, 40, 50);
+  logs.append('one', 'stdout', '\x1b[31mhello\x1b[0m\nline 2\nline 3\nline 4');
+  expect(logs.get('one').map((item) => item.text)).toEqual(['line 2', 'line 3', 'line 4']);
+  logs.append('two', 'stderr', 'x'.repeat(35));
+  const all = [...logs.get('one'), ...logs.get('two')];
+  expect(all.reduce((sum, item) => sum + Buffer.byteLength(item.text), 0)).toBeLessThanOrEqual(50);
+  logs.clear('two'); expect(logs.get('two')).toEqual([]);
+});
