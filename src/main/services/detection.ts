@@ -35,3 +35,13 @@ export function framework(pkg: Manifest): string {
   if (/^next\s+dev(?:\s|$)/.test(script)) return 'Next.js';
   return 'Node';
 }
+
+export function applicationEvidence(files: string[], pkg?: Manifest): boolean {
+  if (files.some((file) => /^(?:vite|next|nuxt|astro|svelte|webpack|rollup|angular|remix)\.config\./i.test(file) || /^angular\.json$/i.test(file) || /^server\.(?:[cm]?js|ts)$/i.test(file))) return true;
+  if (!pkg) return false;
+  if (pkg.scripts.dev?.trim() || pkg.workspace) return true;
+  const dependencies = { ...pkg.dependencies, ...pkg.devDependencies };
+  if (['next', 'react', 'react-dom', 'vite', 'nuxt', 'astro', '@sveltejs/kit', '@angular/core', 'express', 'fastify', 'koa', '@nestjs/core', 'webpack', 'parcel'].some((key) => key in dependencies)) return true;
+  // Formatting and linting commands alone are compatible with an ordinary static website.
+  return Object.entries(pkg.scripts).some(([name, script]) => script.trim() && !/^(?:format|lint|check)(?::|$)/i.test(name));
+}

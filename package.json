@@ -1,12 +1,13 @@
 {
   "name": "local-dev-manager",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Offline desktop controls for local development projects.",
   "type": "module",
   "main": "dist/main/index.cjs",
   "scripts": {
     "setup:runtime": "node scripts/setup-runtime.mjs",
+    "setup:sharing": "node scripts/setup-sharing.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "npm run typecheck && node scripts/build-main.mjs && vite build",
     "start": "node scripts/start.mjs",
@@ -14,7 +15,17 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:desktop": "node scripts/desktop-smoke.mjs",
-    "test:desktop:dev": "node scripts/desktop-smoke.mjs --dev"
+    "test:desktop:dev": "node scripts/desktop-smoke.mjs --dev",
+    "test:sharing:live": "node scripts/sharing-smoke.mjs",
+    "montage": "npm --prefix project-demo run montage",
+    "montage:record": "node project-demo/scripts/record.mjs",
+    "montage:process": "node project-demo/scripts/process.mjs",
+    "montage:audio": "node project-demo/scripts/audio.mjs",
+    "montage:render": "node project-demo/scripts/render.mjs",
+    "montage:finalize": "node project-demo/scripts/finalize.mjs",
+    "montage:qa": "node project-demo/scripts/qa.mjs",
+    "montage:clean": "node project-demo/scripts/clean.mjs",
+    "montage:check": "node node_modules/typescript/bin/tsc --project project-demo/tsconfig.json --noEmit"
   },
   "engines": {
     "node": ">=24"
@@ -25,6 +36,7 @@
     "zustand": "5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.4",
     "@types/react": "19.3.0",

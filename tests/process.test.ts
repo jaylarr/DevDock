@@ -93,17 +93,49 @@ describe('real npm processes on the host operating system', () => {
     expect(await (await fetch(manager.view(project).localUrl!)).text()).toContain('Real Vite fixture');
     expect(await readFile(path.join(directory, 'package.json'), 'utf8')).toBe(original);
   });
+  it.each(['prefix', 'workspace'] as const)('verifies the actual IPv6 Vite URL through an npm %s wrapper after a port conflict', async (wrapper) => {
+    const occupied = createServer((_request, response) => response.end('unrelated IPv6 server'));
+    await new Promise<void>((resolve) => occupied.listen(0, '::1', resolve));
+    const address = occupied.address();
+    if (!address || typeof address === 'string') throw new Error('Missing test port.');
+    try {
+      const directory = await fixtureDirectory(); fixtures.push(directory);
+      const frontend = path.join(directory, 'frontend');
+      await packageFile(directory, { name: 'wrapped-vite-fixture', private: true,
+        ...(wrapper === 'workspace' ? { workspaces: ['frontend'] } : {}),
+        scripts: { dev: wrapper === 'prefix' ? 'npm --prefix frontend run dev' : 'npm --workspace frontend run dev' } });
+      const vite = path.resolve('node_modules/vite/bin/vite.js');
+      const host = wrapper === 'prefix' ? 'localhost' : '::1';
+      await packageFile(frontend, { name: 'frontend', scripts: { dev: `node "${vite}" --host ${host} --port ${address.port}` } });
+      await writeFile(path.join(frontend, 'index.html'), '<h1>Wrapped IPv6 Vite fixture</h1>');
+      const original = await Promise.all([directory, frontend].map((folder) => readFile(path.join(folder, 'package.json'), 'utf8')));
+      const project = (await scanProjects([root(directory)])).projects.find((item) => item.path === directory)!;
+      const logs = new LogManager(() => {});
+      const manager = new ProcessManager(logs, () => {}); managers.push(manager);
+      await manager.start(project);
+      await eventually(() => manager.view(project).status === 'running');
+      const actual = manager.view(project).localUrl!;
+      expect(new URL(actual).hostname).toBe(wrapper === 'prefix' ? 'localhost' : '[::1]');
+      expect(Number(new URL(actual).port)).toBeGreaterThan(address.port);
+      expect(logs.get(project.id).some((line) => line.text.includes(`Port ${address.port} is in use`))).toBe(true);
+      expect(await (await fetch(actual)).text()).toContain('Wrapped IPv6 Vite fixture');
+      await manager.stop(project.id);
+      await eventually(() => unreachable(actual));
+      expect(await (await fetch(`http://[::1]:${address.port}`)).text()).toBe('unrelated IPv6 server');
+      expect(await Promise.all([directory, frontend].map((folder) => readFile(path.join(folder, 'package.json'), 'utf8')))).toEqual(original);
+    } finally { await new Promise<void>((resolve) => occupied.close(() => resolve())); }
+  });
   it('rejects unsupported managers without bootstrapping or downloading them', async () => {
     const { project, manager } = await fixture();
     await expect(manager.start({ ...project, manager: 'yarn' } as ProjectMetadata)).rejects.toThrow('npm execution only');
     expect(manager.view(project).status).toBe('error');
   });
-  it('does not mark an unrelated occupied endpoint ready or stop its owner', async () => {
+  it.each(['127.0.0.1', '::1'])('does not mark an unrelated %s endpoint ready or stop its owner', async (host) => {
     const foreign = createServer((_request, response) => response.end('unrelated server'));
-    await new Promise<void>((resolve) => foreign.listen(0, '127.0.0.1', resolve));
+    await new Promise<void>((resolve) => foreign.listen(0, host, resolve));
     const address = foreign.address();
     if (!address || typeof address === 'string') throw new Error('Missing test port.');
-    const url = `http://127.0.0.1:${address.port}`;
+    const url = `http://${host === '::1' ? '[::1]' : host}:${address.port}`;
     try {
       const { directory, project, manager } = await fixture('quiet');
       await writeFile(path.join(directory, 'server.cjs'), `console.log('Local: ' + ${JSON.stringify(url)}); setInterval(()=>{},1000);`);

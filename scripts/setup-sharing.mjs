@@ -1,0 +1,23 @@
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const pin = JSON.parse(await readFile(path.join(root, 'src/main/tunnels/cloudflared-pin.json'), 'utf8'));
+if (process.platform !== pin.platform || process.arch !== pin.arch) throw new Error('Sharing currently supports native Windows x64 only.');
+const destination = path.join(root, '.sharing-runtime', pin.version);
+const response = await fetch(pin.url, { signal: AbortSignal.timeout(120000) });
+if (!response.ok) throw new Error(`Official runtime download failed: HTTP ${response.status}`);
+const binary = Buffer.from(await response.arrayBuffer());
+if (createHash('sha256').update(binary).digest('hex') !== pin.sha256) throw new Error('Official runtime checksum mismatch. No executable was installed.');
+const licenseResponse = await fetch(`https://raw.githubusercontent.com/cloudflare/cloudflared/${pin.version}/LICENSE`, { signal: AbortSignal.timeout(30000) });
+if (!licenseResponse.ok) throw new Error('Could not retrieve the pinned official license. No executable was installed.');
+const license = await licenseResponse.text();
+await mkdir(destination, { recursive: true });
+await writeFile(path.join(destination, 'LICENSE'), license);
+await writeFile(path.join(destination, 'SOURCE.json'), JSON.stringify({ ...pin, verification: 'GitHub release asset SHA-256 digest, pinned in source', source: `https://github.com/cloudflare/cloudflared/tree/${pin.version}`, license: 'LICENSE', thirdPartyNotices: 'https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/license/' }, null, 2));
+const temporary = path.join(destination, 'cloudflared.exe.download');
+await writeFile(temporary, binary);
+await rename(temporary, path.join(destination, 'cloudflared.exe'));
+console.log(`Prepared official cloudflared ${pin.version}; SHA-256 verified. No tunnel or Windows service was started.`);

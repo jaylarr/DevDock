@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Persistence, emptyState } from '../src/main/services/persistence';
@@ -7,6 +7,51 @@ import { LogManager } from '../src/main/services/logManager';
 import { dispose, fixtureDirectory, packageFile, root } from './helpers';
 
 const fixtures: string[] = [];
+it('excludes release subtrees, removes cached copies, preserves same-name sources and supports re-inclusion', async () => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const app = path.join(directory, 'projects', 'app');
+  const releases = path.join(app, 'data', 'releases');
+  const release = path.join(releases, '123-copy', 'app');
+  const similarlyNamed = path.join(app, 'data', 'releases-other');
+  for (const folder of [app, release, similarlyNamed]) await packageFile(folder, { name: 'same-name', scripts: { dev: 'node server.js' } });
+  const persistence = new Persistence(path.join(directory, 'state'));
+  const service = new AppService(persistence, () => {}); await service.initialize(); await service.addRoot(path.join(directory, 'projects'));
+  expect(service.snapshot().projects).toHaveLength(3);
+  await service.addExclusion(releases);
+  expect(service.snapshot().projects.map((item) => item.path)).toEqual(expect.arrayContaining([app, similarlyNamed]));
+  expect(service.snapshot().projects).toHaveLength(2);
+  expect(await readFile(path.join(release, 'package.json'), 'utf8')).toContain('same-name');
+  const restored = new AppService(persistence, () => {}); await restored.initialize(); await restored.scan();
+  expect(restored.snapshot().projects).toHaveLength(2);
+  const exclusion = restored.snapshot().exclusions.find((item) => item.path === releases)!;
+  await restored.removeExclusion(exclusion.id);
+  expect(restored.snapshot().projects).toHaveLength(3);
+  await expect(restored.removeExclusion(exclusion.id)).rejects.toThrow('not found');
+});
+it('retains actively managed excluded entries, blocks new starts and removes them once inactive', async () => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const project = path.join(directory, 'projects', 'release');
+  await packageFile(project, { scripts: { dev: 'node server.js' } });
+  const service = new AppService(new Persistence(path.join(directory, 'state')), () => {});
+  await service.initialize(); await service.addRoot(path.join(directory, 'projects'));
+  const id = service.snapshot().projects[0]!.id;
+  const active = vi.spyOn(service.processes, 'isActive').mockReturnValue(true);
+  await service.addExclusion(project);
+  expect(service.snapshot().projects).toHaveLength(1);
+  expect(service.snapshot().diagnostics.join(' ')).toContain('retained until stopped');
+  await expect(service.start(id)).rejects.toThrow('excluded');
+  active.mockReturnValue(false); await service.scan();
+  expect(service.snapshot().projects).toHaveLength(0);
+  active.mockRestore();
+});
+it('migrates legacy state to the approved release exclusion and preserves an explicitly empty list', async () => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const persistence = new Persistence(directory);
+  await writeFile(persistence.file, JSON.stringify({ version: 1, roots: [], projects: [], theme: 'dark' }));
+  expect((await persistence.load()).state.exclusions?.[0]).toContain('Automation Context Mapping');
+  await persistence.save({ ...emptyState(), exclusions: [] });
+  expect((await persistence.load()).state.exclusions).toEqual([]);
+});
 afterEach(async () => { for (const directory of fixtures.splice(0)) await dispose(directory); });
 it('serializes concurrent atomic saves and recovers a damaged primary from backup', async () => {
   const directory = await fixtureDirectory(); fixtures.push(directory);

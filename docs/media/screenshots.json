@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-10-02T13:01:46.483Z",
+  "applicationVersion": "0.3.0",
+  "platform": "win32",
+  "fictionalProjects": [
+    "atlas-dashboard",
+    "beacon-api",
+    "canvas-studio",
+    "harbor-docs",
+    "orbit-storefront",
+    "summit-starter"
+  ],
+  "realLocalServers": [
+    "atlas-dashboard (Vite)",
+    "beacon-api (Node)",
+    "canvas-studio (Static HTML)"
+  ],
+  "realUserDataRead": false,
+  "publicTunnelsStarted": false,
+  "normalQuitCleanupVerified": true,
+  "presentation": "Actual Electron renderer. Fixture paths displayed as C:\\Demo Projects; no statuses, links, counts or log content fabricated.",
+  "captures": [
+    {
+      "filename": "01-dashboard-light.png",
+      "caption": "Six fictional projects, three real local servers, light theme.",
+      "width": 1984,
+      "height": 1204
+    },
+    {
+      "filename": "02-dashboard-dark.png",
+      "caption": "The same fictional workspace in dark mode.",
+      "width": 1984,
+      "height": 1204
+    },
+    {
+      "filename": "03-project-details.png",
+      "caption": "Real Vite fixture controls, verified local URL and live output.",
+      "width": 1984,
+      "height": 1204
+    },
+    {
+      "filename": "04-sharing-confirmation.png",
+      "caption": "Public-preview confirmation and compatibility hints; no tunnel was started.",
+      "width": 1984,
+      "height": 1204
+    }
+  ]
+}

@@ -3497,6 +3497,8 @@ Build that exceptionally well first.
 
 # 97. Optional Public Sharing — Cloudflare Quick Tunnels
 
+Implementation approved after review on 2026-10-02 and delivered locally as v0.3.0. The reviewed feature plan is `docs/public-sharing-plan.md`; actual behavior/evidence are in `docs/public-sharing.md`. Only generated demo fixtures were publicly tested. Existing user-project exposure, publication, and packaging remain outside that authorization. Independent visitor-network verification remains pending.
+
 ## Purpose and Scope
 
 Add a dedicated **Share Online** action to a verified running project. It creates a temporary public HTTPS link that forwards to that project's actual local web server. This is a preview of a service running on the user's computer, not a deployment or permanent hosting service.

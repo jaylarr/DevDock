@@ -1,0 +1,26 @@
+{
+  "name": "local-dev-manager-montage",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "montage": "node scripts/pipeline.mjs",
+    "record": "node scripts/record.mjs",
+    "process": "node scripts/process.mjs",
+    "audio": "node scripts/audio.mjs",
+    "render": "node scripts/render.mjs",
+    "finalize": "node scripts/finalize.mjs",
+    "qa": "node scripts/qa.mjs",
+    "clean": "node scripts/clean.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.532",
+    "@remotion/renderer": "4.0.532",
+    "kokoro-js": "1.2.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.532"
+  },
+  "overrides": {
+    "sharp": "0.35.4"
+  }
+}

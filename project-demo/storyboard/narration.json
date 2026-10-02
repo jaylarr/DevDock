@@ -1,0 +1,17 @@
+{
+  "voice": "af_heart",
+  "speed": 1.04,
+  "introSeconds": 9,
+  "outroSeconds": 6,
+  "segments": [
+    {"id":"intro","lines":["Another side project.","Another terminal.","Wait... which port was that?","Meet Local Dev Manager.","Your localhost just leveled up."]},
+    {"id":"01-discovery","lines":["Add your project folders.","Bring your side projects into one dashboard."]},
+    {"id":"02-start","lines":["Hit Start.","Open your app.","Stop or restart when you need to."]},
+    {"id":"07-html","lines":["Even that tiny HTML experiment","gets its own local preview."]},
+    {"id":"03-logs","lines":["Check live logs."]},
+    {"id":"04-focus","lines":["Find your project.","Filter the ones running now."]},
+    {"id":"05-preview","lines":["Want a second opinion?","Use optional sharing for a temporary public preview.","Review access before sharing."]},
+    {"id":"06-theme","lines":["Light mode. Dark mode.","Local controls, with no app account needed."]},
+    {"id":"outro","lines":["Less terminal juggling.","More building.","Meet Local Dev Manager."]}
+  ]
+}

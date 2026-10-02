@@ -4,3 +4,11 @@ dist/
 coverage/
 *.log
 .local-state/
+.sharing-runtime/
+project-demo/recordings/raw/
+project-demo/public/recordings/
+project-demo/output/
+project-demo/.runtime/
+project-demo/.cache/
+project-demo/public/assets/*.wav
+project-demo/public/assets/captions.json

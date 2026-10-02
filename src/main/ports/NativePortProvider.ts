@@ -5,7 +5,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import type { ProjectMetadata } from '../../shared/contracts';
 import { manifest } from '../services/detection';
 
-export interface PortStartResult { child: ChildProcess; assignedPort: number }
+export interface PortStartResult { child: ChildProcess; assignedPort: number; origin?: string }
 export interface PortProvider { start(project: ProjectMetadata): Promise<PortStartResult> }
 export async function executable(name: string): Promise<string> {
   const candidates = process.platform === 'win32' ? [`${name}.exe`, `${name}.cmd`, name] : [name];
@@ -41,6 +41,7 @@ async function freePort(): Promise<number> {
 }
 export class NativePortProvider implements PortProvider {
   async start(project: ProjectMetadata): Promise<PortStartResult> {
+    if (project.kind !== 'script') throw new Error('This provider requires a package-script project.');
     if (project.manager !== 'npm') throw new Error(`${project.manager} is detected, but this first milestone supports npm execution only.`);
     const pkg = manifest(JSON.parse(await readFile(path.join(project.path, 'package.json'), 'utf8')));
     const script = pkg.scripts.dev;

@@ -1,0 +1,9 @@
+[
+  {"id":"01-discovery","seconds":7,"title":"Side projects. Same workspace.","subtitle":"GATHER","focus":1.04,"origin":"55% 38%","benefit":"All together.","detail":"Add your folders. Find your next build.","icon":0},
+  {"id":"02-start","seconds":8,"title":"Click. Run. Build.","subtitle":"LAUNCH","note":"Startup wait condensed","focus":1.12,"origin":"90% 33%","benefit":"Hit Start.","detail":"Your next idea is waiting.","icon":1,"browser":"demo-npm.png"},
+  {"id":"07-html","seconds":6,"title":"Yes, even plain HTML.","subtitle":"PLAY","focus":1.04,"origin":"64% 48%","benefit":"Tiny site. Big energy.","detail":"A local preview for your HTML experiment.","icon":2,"browser":"demo-html.png"},
+  {"id":"03-logs","seconds":3,"title":"See the output.","subtitle":"INSPECT","focus":1.1,"origin":"62% 75%","benefit":"Stay in the know.","detail":"Live output. Right here.","icon":3},
+  {"id":"04-focus","seconds":4,"title":"Find your flow.","subtitle":"FOCUS","focus":1.04,"origin":"40% 30%","benefit":"Less hunting.","detail":"Search. Filter. Keep building.","icon":4},
+  {"id":"05-preview","seconds":10,"title":"Local project. Public peek.","subtitle":"PREVIEW","note":"Confirmation demo · no live tunnel","focus":1,"origin":"50% 50%","benefit":"Show the idea.","detail":"Optional temporary HTTPS previews.","icon":5},
+  {"id":"06-theme","seconds":7,"title":"Your workspace. Your vibe.","subtitle":"MAKE IT YOURS","focus":1.02,"origin":"56% 42%","benefit":"Make it yours.","detail":"Local controls. No app account.","icon":6}
+]

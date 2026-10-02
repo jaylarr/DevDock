@@ -18,7 +18,7 @@ describe('project discovery', () => {
     expect(result.projects).toHaveLength(2);
     expect(new Set(result.projects.map((item) => item.id)).size).toBe(2);
     expect(new Set(result.projects.map((item) => item.slug)).size).toBe(2);
-    expect(result.diagnostics).toHaveLength(1);
+    expect(result.diagnostics).toHaveLength(2);
     expect(result.projects.map((item) => item.devScript)).toEqual(['DO_NOT_EXECUTE', 'DO_NOT_EXECUTE']);
   });
   it('cancels without reporting a completed scan', async () => {

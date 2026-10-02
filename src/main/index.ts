@@ -6,6 +6,7 @@ import { AppService } from './services/appService';
 import { Persistence } from './services/persistence';
 import { localOrigin } from './services/processManager';
 import { within } from './services/identity';
+import { sharingCompatibility } from './services/sharingCompatibility';
 
 app.setName('Local Dev Manager');
 if (process.env.LDM_DATA_DIR) app.setPath('userData', path.resolve(process.env.LDM_DATA_DIR));
@@ -45,9 +46,20 @@ function handlers(manager: AppService): void {
   handle(channels.removeRoot, (id) => manager.removeRoot(identifier(id)));
   handle(channels.scan, () => manager.scan());
   handle(channels.cancelScan, () => manager.cancelScan());
+  handle(channels.addExclusion, async () => {
+    const selected = await dialog.showOpenDialog(window!, { title: 'Exclude a folder from project discovery', properties: ['openDirectory'] });
+    if (!selected.canceled && selected.filePaths[0]) await manager.addExclusion(selected.filePaths[0]);
+  });
+  handle(channels.removeExclusion, (id) => manager.removeExclusion(identifier(id)));
   handle(channels.start, (id) => manager.start(identifier(id)));
   handle(channels.stop, (id) => manager.stop(identifier(id)));
   handle(channels.restart, (id) => manager.restart(identifier(id)));
+  handle(channels.share, (id) => manager.share(identifier(id)));
+  handle(channels.compatibility, (id) => sharingCompatibility(manager.project(identifier(id))));
+  handle(channels.stopSharing, (id) => manager.stopSharing(identifier(id)));
+  handle(channels.stopAllSharing, () => manager.stopAllSharing());
+  handle(channels.copyPublicLink, (id) => clipboard.writeText(manager.publicUrl(identifier(id))));
+  handle(channels.openPublicLink, (id) => shell.openExternal(manager.publicUrl(identifier(id))));
   handle(channels.logs, (id) => { const project = manager.project(identifier(id)); return manager.logs.get(project.id); });
   handle(channels.clearLogs, (id) => { const project = manager.project(identifier(id)); manager.logs.clear(project.id); });
   handle(channels.copyLogs, (id) => {
@@ -62,7 +74,8 @@ function handlers(manager: AppService): void {
     const project = manager.processes.view(manager.project(identifier(id)));
     const url = project.localUrl ? localOrigin(project.localUrl) : undefined;
     if (project.status !== 'running' || !url) throw new Error('A verified local server is not available.');
-    await shell.openExternal(url);
+    // Preserve the manager-selected entry page on the verified loopback origin.
+    await shell.openExternal(project.localUrl!);
   });
   handle(channels.theme, (theme) => {
     if (theme !== 'system' && theme !== 'light' && theme !== 'dark') throw new Error('Invalid theme.');
@@ -83,7 +96,9 @@ else {
       try { return new Response(new Uint8Array(await readFile(file)), { headers: { 'Content-Type': mime[path.extname(file)] ?? 'application/octet-stream' } }); }
       catch { return new Response('Not found', { status: 404 }); }
     });
-    service = new AppService(new Persistence(app.getPath('userData')), changed);
+    service = new AppService(new Persistence(app.getPath('userData')), changed, {
+      directory: path.join(app.getAppPath(), '.sharing-runtime'), protectedOrigin: developmentUrl?.origin,
+    });
     await service.initialize();
     window = new BrowserWindow({ width: 1220, height: 800, minWidth: 850, minHeight: 600, show: false,
       backgroundColor: '#f4f5f1', title: 'Local Dev Manager', autoHideMenuBar: true,

@@ -1,0 +1,8 @@
+[
+  {"id":"01-discovery","seconds":7,"title":"One folder. Your whole workspace.","subtitle":"DISCOVER","focus":1.08,"origin":"65% 44%"},
+  {"id":"02-start","seconds":8,"title":"Pick. Start. Build.","subtitle":"RUN","note":"Startup wait condensed","focus":1.42,"origin":"98% 33%"},
+  {"id":"03-logs","seconds":7,"title":"See exactly what's happening.","subtitle":"INSPECT","focus":1.27,"origin":"73% 83%"},
+  {"id":"04-focus","seconds":6,"title":"Find it. Focus on it.","subtitle":"FOCUS","focus":1.1,"origin":"34% 24%"},
+  {"id":"05-preview","seconds":7,"title":"Your project. Your choice.","subtitle":"PREVIEW","note":"Confirmation only · no public tunnel","focus":1.25,"origin":"50% 50%"},
+  {"id":"06-theme","seconds":7,"title":"A calmer development day.","subtitle":"WORKSPACE","focus":1.05,"origin":"56% 42%"}
+]

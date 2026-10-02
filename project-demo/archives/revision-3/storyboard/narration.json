@@ -1,0 +1,16 @@
+{
+  "voice": "af_heart",
+  "speed": 1.06,
+  "introSeconds": 4,
+  "outroSeconds": 4,
+  "segments": [
+    {"id":"intro","lines":["Still juggling terminals?","Meet Local Dev Manager."]},
+    {"id":"01-discovery","lines":["Add one folder.","Your Vite, Node, and static projects appear together."]},
+    {"id":"02-start","lines":["Pick a project. Hit Start.","Watch it become a verified, running server."]},
+    {"id":"03-logs","lines":["Need answers?","Open live logs, the local address, and runtime details."]},
+    {"id":"04-focus","lines":["Search by name.","Or filter to just the servers running now."]},
+    {"id":"05-preview","lines":["Sharing starts with a clear access check.","Here, we're only reviewing the confirmation."]},
+    {"id":"06-theme","lines":["Switch to dark mode.","Three local servers, all in one workspace."]},
+    {"id":"outro","lines":["Less terminal juggling. More building."]}
+  ]
+}
