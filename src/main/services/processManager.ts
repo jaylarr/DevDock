@@ -7,22 +7,17 @@ import { ProjectPortProvider } from '../ports/StaticPortProvider';
 import { LogManager } from './logManager';
 import { ownsListeningPort } from './processOwnership';
 import { within } from './identity';
-import type { VerifiedOrigin } from '../tunnels/TunnelProvider';
+import { localOrigin, type VerifiedOrigin } from '../tunnels/TunnelProvider';
+export { localOrigin } from '../tunnels/TunnelProvider';
 
 interface Runtime {
   project: ProjectMetadata;
   child: ChildProcess; status: Status; assignedPort: number; pid: number; intentional: boolean;
   origin?: string; ready?: string; error?: string; startedAt: number;
+  readyCallback?: (url: string, current: () => boolean) => Promise<void>;
   timer?: ReturnType<typeof setInterval>; checking: boolean; stopPromise?: Promise<void>;
 }
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-export function localOrigin(value: string): string | undefined {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) || !url.port || url.username || url.password) return;
-    return `${url.protocol}//${url.host}`;
-  } catch { return; }
-}
 export class ProcessManager {
   private runtime = new Map<string, Runtime>();
   private failures = new Map<string, string>();
@@ -48,7 +43,7 @@ export class ProcessManager {
       managed: this.isManaged(project.id),
       pid: run?.pid, port: run?.ready ? Number(new URL(run.ready).port) : undefined, localUrl: run?.ready, error: run?.error ?? failure };
   }
-  start(project: ProjectMetadata, beforeLaunch?: () => Promise<void>): Promise<void> {
+  start(project: ProjectMetadata, beforeLaunch?: () => Promise<void>, readyCallback?: Runtime['readyCallback']): Promise<void> {
     if (this.closing) return Promise.reject(new Error('The application is shutting down.'));
     if (this.pending.has(project.id) || this.isActive(project.id)) return Promise.reject(new Error('This project is already starting or running.'));
     const owned = [...this.pendingProjects.values(), ...[...this.runtime.values()].filter((run) => this.isActive(run.project.id)).map((run) => run.project)];
@@ -57,7 +52,7 @@ export class ProcessManager {
     }
     this.runtime.delete(project.id);
     this.pendingProjects.set(project.id, project);
-    const job = this.launch(project, beforeLaunch).finally(() => { this.pending.delete(project.id); this.pendingProjects.delete(project.id); this.changed(); });
+    const job = this.launch(project, beforeLaunch, readyCallback).finally(() => { this.pending.delete(project.id); this.pendingProjects.delete(project.id); this.changed(); });
     this.pending.set(project.id, job);
     this.changed();
     return job;
@@ -67,13 +62,14 @@ export class ProcessManager {
     return !!run && run.child.exitCode === null && run.child.signalCode === null;
   }
   isManaged(id: string): boolean { return this.pending.has(id) || this.isActive(id); }
-  private async launch(project: ProjectMetadata, beforeLaunch?: () => Promise<void>): Promise<void> {
+  private async launch(project: ProjectMetadata, beforeLaunch?: () => Promise<void>, readyCallback?: Runtime['readyCallback']): Promise<void> {
     this.failures.delete(project.id);
+    // A rejected preflight has not launched a process and must not create a crashed/error runtime.
+    await beforeLaunch?.();
     try {
-      await beforeLaunch?.();
       const { child, assignedPort, origin } = await this.provider.start(project);
       if (!child.pid) throw new Error('The development process could not be created.');
-      const run: Runtime = { project, child, pid: child.pid, assignedPort, origin, status: 'starting', intentional: false, startedAt: Date.now(), checking: false };
+      const run: Runtime = { project, child, pid: child.pid, assignedPort, origin, status: 'starting', intentional: false, startedAt: Date.now(), checking: false, readyCallback };
       this.runtime.set(project.id, run);
       this.logs.append(project.id, 'system', `Starting ${project.kind === 'static' ? `Static HTML · ${project.entryFile}` : `${project.manager} run dev`} · PID ${child.pid} · PORT=${assignedPort}`);
       if (origin) this.logs.append(project.id, 'system', `Local: ${origin}`);
@@ -132,6 +128,10 @@ export class ProcessManager {
           run.status = 'running'; run.ready = entryUrl; run.error = undefined;
           if (run.timer) clearInterval(run.timer);
           this.logs.append(id, 'system', `Ready · ${run.ready} · HTTP ${response.status}`); this.changed();
+          const ready = run.ready; const callback = run.readyCallback; run.readyCallback = undefined;
+          if (callback) void callback(ready, () => this.runtime.get(id) === run && run.status === 'running' && run.ready === ready && this.isActive(id)).catch(() => {
+            this.logs.append(id, 'system', 'Browser opening failed. Use Open to retry.');
+          });
         }
       }
     } catch { /* The server may still be booting. */ }

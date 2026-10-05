@@ -6,9 +6,9 @@ import path from 'node:path';
 import { StringDecoder } from 'node:string_decoder';
 import { stripVTControlCharacters } from 'node:util';
 import type { SharingAvailability } from '../../shared/contracts';
-import { localOrigin } from '../services/processManager';
 import pin from './cloudflared-pin.json';
-import { publicOrigin, type TunnelEvents, type TunnelHandle, type TunnelProvider } from './TunnelProvider';
+import { localOrigin, publicOrigin, type TunnelEvents, type TunnelHandle, type TunnelProvider } from './TunnelProvider';
+import { startPreviewBridge, type PreviewBridge } from './PreviewBridge';
 
 const alive = (child: ChildProcess) => !!child.pid && child.exitCode === null && child.signalCode === null;
 const pause = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -68,13 +68,16 @@ export class CloudflareQuickTunnelProvider implements TunnelProvider {
     const base = path.join(this.directory, 'sessions'); await mkdir(base, { recursive: true });
     const home = await mkdtemp(path.join(base, 'tunnel-'));
     let child: ChildProcess | undefined;
+    let bridge: PreviewBridge | undefined;
     try {
+      bridge = await startPreviewBridge(origin);
+      const preview = bridge;
       const metrics = `http://127.0.0.1:${await freePort()}`;
       signal.throwIfAborted();
       // Allow only OS runtime variables; isolate account configuration and inherited TUNNEL_* flags.
       const env: NodeJS.ProcessEnv = { HOME: home, USERPROFILE: home };
       for (const key of ['SystemRoot', 'WINDIR', 'PATH', 'TEMP', 'TMP']) if (process.env[key]) env[key] = process.env[key];
-      child = spawn(this.binary(), ['tunnel', '--no-autoupdate', '--url', origin, '--http-host-header', new URL(origin).host,
+      child = spawn(this.binary(), ['tunnel', '--no-autoupdate', '--url', preview.origin, '--http-host-header', new URL(origin).host,
         '--metrics', new URL(metrics).host, '--output', 'json', '--loglevel', 'info'], {
         cwd: home, env, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
       });
@@ -84,7 +87,7 @@ export class CloudflareQuickTunnelProvider implements TunnelProvider {
       let connected = false;
       let checking = false;
       for (const stream of [child.stdout, child.stderr]) {
-        const output = new TunnelOutput({ ...events, connected: () => { connected = true; events.connected(); } });
+        const output = new TunnelOutput({ ...events, url: (value) => { preview.setPublicOrigin(value); events.url(value); }, connected: () => { connected = true; events.connected(); } });
         const decoder = new StringDecoder('utf8');
         stream?.on('data', (chunk: Buffer) => output.write(decoder.write(chunk)));
         stream?.on('end', () => output.write(decoder.end()));
@@ -97,14 +100,15 @@ export class CloudflareQuickTunnelProvider implements TunnelProvider {
           if (!stopping && alive(processHandle)) { if (response.ok) events.connected(); else events.disconnected(); }
         }).catch(() => { if (!stopping && alive(processHandle)) events.disconnected(); }).finally(() => { checking = false; });
       }, 3000);
-      child.once('error', (error) => { clearInterval(monitor); if (!stopping) events.exited(error.message); });
-      child.once('exit', (code, sig) => { clearInterval(monitor); if (!stopping) events.exited(`Tunnel exited (${code ?? sig}). Retry sharing when ready.`); });
+      child.once('error', (error) => { clearInterval(monitor); void preview.stop().catch(() => {}); if (!stopping) events.exited(error.message); });
+      child.once('exit', (code, sig) => { clearInterval(monitor); void preview.stop().catch(() => {}); if (!stopping) events.exited(`Tunnel exited (${code ?? sig}). Retry sharing when ready.`); });
       const handle: TunnelHandle = {
         alive: () => alive(processHandle),
         stop: () => {
           if (stopPromise) return stopPromise;
           stopping = true; clearInterval(monitor);
           stopPromise = (async () => {
+            await preview.stop();
             if (alive(processHandle)) {
               let forceError: unknown;
               await killTree(processHandle.pid!, false).catch(() => undefined);
@@ -125,6 +129,7 @@ export class CloudflareQuickTunnelProvider implements TunnelProvider {
       if (signal.aborted) await handle.stop();
       return handle;
     } catch (error) {
+      await bridge?.stop();
       if (child && alive(child)) await killTree(child.pid!, true);
       await rm(home, { recursive: true, force: true });
       throw error;

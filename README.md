@@ -19,6 +19,7 @@ A desktop dashboard for finding, starting, stopping, and inspecting local develo
 - [Project requirements](#project-requirements)
 - [Static HTML sites](#static-html-sites)
 - [Temporary public previews](#temporary-public-previews)
+- [Settings](#settings)
 - [Status and logs](#status-and-logs)
 - [Local data, privacy, and security](#local-data-privacy-and-security)
 - [Troubleshooting](#troubleshooting)
@@ -35,9 +36,10 @@ DevDock is for developers who switch between several local websites or apps and 
 - Start, stop, restart, and open supported projects in your default browser.
 - Run npm projects with a `dev` script and standalone HTML/HTM websites.
 - Search by name, framework, or path; filter by root or status; paginate the list.
+- Pin focus projects above the paginated rows, and return to the last ten projects used through DevDock. See [pins and recent activity](docs/project-focus.md).
 - Inspect live output, copy or clear logs, and open a project's folder.
 - Exclude folders and their descendants from discovery without deleting them.
-- Choose light or dark appearance.
+- Choose from seven appearances, save list density/page size, and manage workspace preferences in Settings.
 - Optionally create a temporary public HTTPS preview for each running project.
 
 Local controls use local application assets and have no app account, hosted backend, or application telemetry. Initial installation downloads dependencies. Public previews require internet and use Cloudflare; your projects may also have their own internet dependencies.
@@ -118,11 +120,11 @@ No project starts automatically. Reopening restores saved registration and appea
 
 **Rescan** refreshes the catalog. **Cancel scan** preserves the previous list. Missing or no-longer-runnable cached projects can stay visible so you can understand what changed; rescan after restoring their files or `dev` scripts.
 
-Use **Discovery settings → Exclude folder from discovery** to omit a subtree, or **Include again** to restore it. Exclusions do not delete files. A managed excluded project stays visible until stopped, and cannot begin a new launch or share session while excluded.
+Use **Settings → Discovery → Exclude folder from discovery** to omit a subtree, or **Include again** to restore it. Exclusions do not delete files. A managed excluded project stays visible until stopped, and cannot begin a new launch or share session while excluded.
 
-The × beside a root removes its registration and cached entries, not its files. Stop its managed servers/tunnels before removing it.
+Use **Settings → Discovery → Remove registration** to remove a root and its cached entries, while keeping its files. Stop its managed servers/tunnels before removing it. Sidebar roots remain project filters.
 
-This development checkout still includes a machine-specific default exclusion in source. Review Discovery settings on first launch; removing an exclusion is remembered. Generalizing that default is a publication follow-up recorded in the audit.
+Fresh installs have no preset exclusions. Existing saved exclusions, including an explicitly empty list, survive migration. Adding folders and changing exclusions still scans immediately when startup scanning is disabled.
 
 ## Project requirements
 
@@ -173,7 +175,34 @@ Anyone with the link can access that project's available web pages and actions. 
 
 Cloudflare Quick Tunnels are temporary development previews with changing hostnames, no uptime guarantee, a 200 in-flight-request limit, and no Server-Sent Events support. See the [official provider limits](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/).
 
-Browser-side `localhost` API URLs point to the visitor's computer. Separate API ports, OAuth callback allowlists, cookies, Next.js dev-origin rules, and custom HMR may need changes in the project. Compatibility hints are bounded read-only inspections, not complete audits. The manager does not modify your project's configuration. See the [sharing guide](docs/public-sharing.md) for details and evidence boundaries.
+Browser-side `localhost` API URLs point to the visitor's computer. Separate API ports, OAuth callback allowlists, cookies, and custom HMR may need changes in the project. Next.js dev assets/live reload use a bridge scoped to the current preview hostname. Compatibility hints are bounded read-only inspections, not complete audits. The manager does not modify your project's configuration. See the [sharing guide](docs/public-sharing.md) for details and evidence boundaries.
+
+## Settings
+
+Open **Settings** near the bottom of the sidebar. Changes save individually to local app data; failed saves retain the last confirmed value. **Back to projects** preserves your search, filter, page, selected details, and list scroll within the session.
+
+| Section | Controls |
+| --- | --- |
+| Appearance | System, Light, Dark, High Contrast, Matrix, Midnight, Sepia; 5/10/20 projects per page; Standard/Compact row density |
+| Discovery | Registered folders and exclusions, scan-on-launch, manual scan/cancellation, latest session scan notes |
+| External activity | Local VS Code, Codex, Claude Code, and PowerShell bridges; detection toggle and manual checks |
+| Behavior | Open the local browser after verified startup, remember the last status/root filter, follow logs by default |
+| Local data | Open data folder, export/import settings, restore preference defaults, clear discovery cache |
+| About & diagnostics | App/runtime versions, local Node/npm/sharing checks, sanitized diagnostic preview/copy, bundled help |
+
+Startup scanning defaults to On. Browser auto-open and remembered filters default to Off; log following defaults to On. No preference starts projects or restores public previews automatically. Auto-open applies once to launches started with it enabled, including Restart; it preserves a static site's entry filename. Browser failures leave the server running, with an Open action to retry.
+
+Page size is saved whether changed in Settings or dashboard pagination. Search and selected details are never restored across app launches. The log panel's Auto-scroll control overrides its default for the current view; changing the default applies when opening another project's details.
+
+**Export settings** creates a portable JSON file. By default it contains preferences only. Include registrations/exclusions only when you want to export local paths; cached metadata, process IDs, links, and logs are omitted. **Import settings** accepts this portable format, up to 1 MiB, and shows a preview before applying. Folder replacement is optional and unchecked initially. It replaces registrations/exclusions and clears cached entries, then offers a separate rescan. Missing local folders remain registered; unsupported network/device paths are rejected. Previews expire after five minutes and require reopening if configuration changed.
+
+**Restore defaults** resets preferences while retaining folders, exclusions, cached projects, and active resources. **Clear cache** removes only cached entries and requires scans, managed servers, and sharing to be stopped first; files, registrations, preferences, exclusions, and recovery backups remain. Use Rescan to rebuild the list.
+
+Diagnostics perform bounded local runtime checks and never create tunnels, install software, or check a provider over the internet. **Copy diagnostics** copies exactly the previewed report, omitting local paths, project names, URLs, logs, and environment variables. Runtime availability is not a project compatibility guarantee.
+
+See the [Settings implementation and validation record](docs/settings.md) for migration, portability, and test details.
+
+Connect external tools in **Settings → External activity** to see which registered projects are open elsewhere and include their use in Recent activity. Detected external servers show **Running elsewhere**, their actual URL, **Open**, and **Stop external server**. Stop checks the displayed server identities against fresh process and port data, ends the verified runtime and its workers, and keeps the editor and terminal open. Restart stays disabled for external servers, and closing DevDock leaves them running. Start checks for them before launching to prevent duplicates. VS Code can relay new dev-command output through shell integration. Codex hooks require review and trust in Codex after setup. Claude support covers Claude Code, and terminal support covers native PowerShell sessions with profiles enabled. An open workspace alone does not imply a running server. See the [external activity guide](docs/external-activity.md) for setup and supported tools.
 
 ## Status and logs
 
@@ -193,9 +222,9 @@ Project logs are bounded in-memory text: 5,000 lines / 1 MB per project and 16 M
 
 ## Local data, privacy, and security
 
-The manager saves registered roots, cached project metadata, exclusions, and appearance in `state.json` under Electron user data, normally `%APPDATA%\Local Dev Manager`. Paths and metadata are readable local JSON, not encrypted. Keep this directory out of public source archives.
+The manager saves registered roots, cached project metadata, exclusions, settings, and an optional remembered filter in `state.json` under Electron user data, normally `%APPDATA%\Local Dev Manager`. Paths and metadata are readable local JSON, not encrypted. Keep this directory out of public source archives.
 
-Atomic saves maintain `state.json.bak`. Saved-state v2 migrates v1 records and preserves the first valid legacy `state.json.v1.bak` for manual rollback. That legacy backup does not include later v2 changes. Process objects, active URLs/PIDs, logs, and sharing sessions are not restored.
+Atomic saves maintain `state.json.bak`. Saved-state v3 migrates v1/v2 records and preserves the first valid legacy `state.json.v1.bak` or `state.json.v2.bak` for manual rollback. Those write-once backups exclude later changes. Invalid individual optional preferences fall back to defaults while retaining the catalog. Future schema versions are rejected without overwriting them. Existing older binaries lack this new guard: use an appropriate legacy backup in a separate data directory when rolling back; do not point them at v3 state. Process objects, active URLs/PIDs, logs, and sharing sessions are not restored.
 
 For isolated development/testing, `LDM_DATA_DIR` redirects the manager's own data. `LDM_RENDERER_URL` is used by development tooling for its loopback renderer. These are app-level development controls; users do not need to configure them for ordinary launch.
 
@@ -245,10 +274,14 @@ npm.cmd run lint
 npm.cmd test
 npm.cmd run build
 npm.cmd run test:desktop
+npm.cmd run test:settings
 npm.cmd run test:desktop:dev
+npm.cmd run test:projects
+npm.cmd run test:activity
+npm.cmd run test:external-servers
 ```
 
-Tests generate disposable fixtures under `.test-artifacts/`. Desktop checks use real Electron, isolated user data, real IPC and local servers; the native picker response is stubbed. Browser-network emulation is not a physically disconnected-PC test. Tests require working Windows process queries/cleanup and may fail inside restrictive sandboxes.
+Tests generate disposable fixtures under `.test-artifacts/`. Desktop checks use real Electron, isolated user data, real IPC and local servers; native picker responses and browser/clipboard actions are stubbed. Settings checks additionally cover migration, context preservation, import preview/conflict handling, resets, and diagnostics. Browser-network emulation is not a physically disconnected-PC test. Tests require working Windows process queries/cleanup and may fail inside restrictive sandboxes.
 
 Reproduce the public-safe screenshots with:
 

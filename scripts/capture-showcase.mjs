@@ -14,8 +14,8 @@ const data = path.join(fixture, 'user-data');
 const output = path.resolve('docs/media');
 await mkdir(output, { recursive: true });
 await mkdir(data, { recursive: true });
-// An explicitly empty exclusion list keeps machine-specific defaults out of this demo.
-await writeFile(path.join(data, 'state.json'), JSON.stringify({ version: 2, roots: [], projects: [], exclusions: [], theme: 'light' }));
+// Seed current-schema fictional preferences; the normal catalog is never read.
+await writeFile(path.join(data, 'state.json'), JSON.stringify({ version: 3, roots: [], projects: [], exclusions: [], settings: { appearance: { theme: 'light', pageSize: 10, density: 'standard' }, discovery: { scanOnLaunch: true }, behavior: { autoOpenBrowser: false, rememberLastFilter: false, logAutoScroll: true } }, view: { lastFilter: { kind: 'status', value: 'all' } } }));
 let application;
 const urls = [];
 const errors = [];
@@ -104,7 +104,7 @@ try {
     captures.push({ filename, caption, width: png.readUInt32BE(16), height: png.readUInt32BE(20) });
   }
   await capture('01-dashboard-light.png', 'Six fictional projects, three real local servers, light theme.');
-  await page.getByRole('switch', { name: 'Dark mode' }).click();
+  await page.evaluate(() => window.devManager.updateSettings({ appearance: { theme: 'dark' } }));
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
   await capture('02-dashboard-dark.png', 'The same fictional workspace in dark mode.');
   await row.getByRole('button', { name: 'View logs for atlas-dashboard', exact: true }).click();

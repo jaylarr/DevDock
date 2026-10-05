@@ -17,7 +17,7 @@ export async function executable(name: string): Promise<string> {
   }
   throw new Error(`${name} is unavailable on PATH. Install it separately, then reopen the manager.`);
 }
-async function npmCommand(): Promise<{ node: string; cli: string }> {
+export async function npmCommand(): Promise<{ node: string; cli: string }> {
   const node = await executable('node');
   const npm = await executable('npm');
   const candidates = [path.join(path.dirname(npm), 'node_modules/npm/bin/npm-cli.js'),

@@ -29,7 +29,7 @@ Sandboxed Electron renderer (React + Zustand + local CSS)
 
 Discovery inventories application boundaries before resolving HTML candidates across roots. Parent application evidence blocks directly selected public/docs subfolders; generated-directory boundaries allow intentionally selected exports/isolated fixtures. A static root groups descendant pages, with explicit nested roots represented separately. Any overlapping static/script or static/static managed launch is rejected, including pending launches. AppService performs ownership revalidation inside the reserved startup lifecycle, preserves active launch metadata through rescans, and removes inactive superseded static entries.
 
-Saved-state v2 distinguishes script metadata from a static entry filename. Persistence validates/migrates v1, preserves a separate nonrotating v1 backup (including a valid recovered legacy backup), and continues atomic writes/recovery. The browser entry URL may contain a validated HTML path; readiness checks that page on the verified origin, and Open preserves the path. The renderer uses launch capability rather than a package-manager-only test for static controls.
+Saved-state v3 retains the v2 distinction between script metadata and a static entry filename. Persistence validates/migrates v1/v2, preserves separate nonrotating legacy backups (including a valid recovered legacy backup), and continues atomic writes/recovery. The browser entry URL may contain a validated HTML path; readiness checks that page on the verified origin, and Open preserves the path. The renderer uses launch capability rather than a package-manager-only test for static controls.
 
 `ProcessManager` prevents duplicate starts, captures split UTF-8 streams, detects exit/crash, checks readiness, and stops only owned process trees. URL parsing accepts HTTP loopback endpoints with explicit ports. Windows `netstat` and CIM process ancestry prevent a URL logged by one process from falsely identifying an unrelated server as its own.
 
@@ -53,4 +53,28 @@ TunnelManager/CloudflareQuickTunnelProvider are implemented independently of pro
 
 The pinned Windows executable is checksum-verified locally, runs with isolated configuration/environment and loopback readiness metrics, and parses bounded structured output. Copy/open are project-ID-only IPC operations using the backend's current validated link. Read-only bounded source inspection supplies compatibility hints in a native modal confirmation. The renderer's external resource policy is unchanged; visitors use their own browser and project tunnel, not the manager interface. See `docs/public-sharing.md` for behavior and bounded evidence.
 
+Cloudflared connects through a session-owned loopback PreviewBridge to the verified project origin. Only the session's exact public origin is translated to the local origin for Next internal dev requests, including upgrades; other application headers are preserved. Stop, tunnel exit, and launch failure close the bridge and its connections. Windows ownership queries await drained stdout and coalesce simultaneous requests without caching positive verdicts.
+
 Installer/resource-path distribution, Node-version management, and process-recovery job objects remain pending.
+
+## Settings
+
+`src/shared/settings.ts` supplies the single settings model, fresh defaults, strict patches, typed saved filters, and diagnostic/import contracts. `SettingsView` renders six sections in the existing shell. The dashboard remains mounted while hidden so navigation preserves session context. The main process owns persisted settings; renderer storage is not duplicated.
+
+AppService serializes immutable state commits and publishes a new snapshot only after an atomic save succeeds. Scans merge catalog results into the latest preferences. A catalog mutation barrier blocks new launches during root removal, cache clearing, or folder-import replacement; replacement also checks pending processes and managed tunnels.
+
+`SettingsTransfer` handles bounded portable JSON, opt-in registration export, normalized local paths, immutable five-minute preview tokens, and revision checks. It accepts no scripts or runtime state. Native file pickers/writes remain in main; the renderer has no arbitrary file endpoint.
+
+`LocalDiagnostics` reuses Node/npm resolution, caches bounded local version checks, and copies only the exact allowlisted report preview. No runtime download or network probe is part of diagnostics.
+
+ProcessManager emits a once-only callback at verified readiness for each runtime instance. AppService captures auto-open eligibility at launch; the callback rechecks the runtime and shutdown before invoking the main browser opener. Browser errors are logged separately from server status.
+
+## External activity
+
+`ExternalActivity` inspects bounded local file reports every five seconds. A native Windows process query returns only PID, parent PID, and creation time; it validates owner lifetimes and excludes DevDock descendants without reading command lines. Reports match the deepest registered, nonmissing, nonexcluded project path. Generation checks discard late results during toggles/shutdown. Activity timestamps and source are committed through AppService, while source presence remains ephemeral and independent of ProcessManager.
+
+`ExternalServers` correlates native loopback TCP listeners with process ancestry, birth times, selected Node-family entry script paths, and connected terminal metadata. It excludes DevDock descendants, matches registered projects, and probes HTTP readiness. AppService overlays unmanaged server state without adding a ProcessManager runtime. A fresh preflight inside ProcessManager's reserved launch blocks duplicates or unavailable native checks. Open refreshes and validates the current URL; Stop and Restart cannot control an external server. Native checks continue while optional tool reporting is disabled.
+
+The VS Code bridge attaches to the public terminal shell execution API for plain dev commands and atomically writes bounded output snapshots for registered projects. `ExternalServers` validates reporter/terminal births and server descendants, deduplicates sequences and multiport matches, and relays entries into LogManager. Full command lines, environment values, terminal history, and unrelated executions are not transported. Output from before attachment cannot be replayed.
+
+`activitySetup` packages an offline VSIX and merges passive agent hooks or marked PowerShell profile blocks, keeping backup copies and unrelated configuration. Bundled reporters honor a shared local enable policy and allowlisted activity/output schemas. Codex's native hook trust review remains user-controlled. Preload exposes only allowlisted source setup and refresh operations; renderer callers cannot supply commands, config paths, or arbitrary process IDs. See `docs/external-activity.md` for capabilities, expiry rules, and verification boundaries.

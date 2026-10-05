@@ -49,7 +49,7 @@ Optional saved-catalog inspection produces a machine-local report at `.test-arti
 
 - **HTML:** the public link preserves the encoded selected entry filename, including non-index names. Relative pages/assets use one origin. Existing static-server restrictions remain in place.
 - **Vite:** the tunnel-specific Host override avoids accepting every public hostname in project configuration. The generated fixture's public WebSocket/reload works; custom HMR settings can still need review.
-- **Next.js:** pages may load while dev-origin rules block assets/reload. The current public hostname may need `allowedDevOrigins` in Next configuration. The manager flags this but does not change it. The disposable fixture uses `allowedDevOrigins: ['*.trycloudflare.com']`; that is not a blanket recommendation for private apps. [Official Next.js guidance](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)
+- **Next.js:** a session-owned loopback bridge translates the current preview's `Origin`/`Referer` for Next dev assets/HMR under `/_next/`, `__nextjs/`, and `__nextjs_font/`, including base paths. Foreign, null, malformed, and previous-session origins are rejected on those paths. Application authentication, cookies, forwarding headers, and custom WebSockets retain their existing headers. Project source/configuration is unchanged. Next validates dev origins independently of the Host header; see [official Next.js guidance](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins).
 - **Separate API:** browser `localhost` URLs refer to the visitor's computer. A same-origin proxy/public API is a separate project change.
 - **Login/cookies/redirects:** temporary hostnames can need callback/origin allowlist or HTTPS cookie changes.
 - **SSE:** unsupported by Quick Tunnels; some AI streaming needs another reviewed approach.
@@ -86,7 +86,9 @@ The final regression run also exposed a Windows taskkill/exit race. Both project
 
 Sharing uses a stricter ownership check than the existing local readiness check: every listener on the chosen port must belong to the project process tree. It fails closed when another process owns an address family/interface on the same port, preventing an owned IPv4 listener from being mistaken for an unrelated IPv6 localhost endpoint. A real mixed-family listener regression test passed. Such ambiguous setups may require restarting onto an uncontested port.
 
-The first public run served all three fixture pages/assets and passed Vite reload. Next reload exposed its dev-origin protection. Adding an allowlist only to the disposable Next fixture removed that rejection. The reload test also needed to wait for client hydration and a received WebSocket frame before editing a server-rendered page. With that readiness check, the generated Next reload passed. The original failure evidence is retained at `.test-artifacts/public-sharing-first-attempt.json`.
+The 2026-10-05 ownership checker waits for stdout to finish before parsing JSON, uses an explicit array and terminating PowerShell errors, and permits up to ten seconds per query. Concurrent preview checks share only an in-flight snapshot, with no cached successful ownership verdict. Ownership loss or an unavailable query still ends sharing.
+
+The first 2026-10-02 public run served all three fixture pages/assets and passed Vite reload. Next reload exposed its dev-origin protection. Adding an allowlist only to that disposable Next fixture removed the rejection. The current regression fixture uses Turbopack and no dev-origin allowlist to exercise the preview bridge, and waits for client hydration and a received WebSocket frame before editing the page. The original failure evidence is retained at `.test-artifacts/public-sharing-first-attempt.json`.
 
 The public test uses disposable projects and isolated Electron data. It reuses installed third-party Next.js 16.3.6 dependencies through a fixture-only junction, runs generated scripts/config/source, and builds under the disposable fixture. It never runs an existing project's dev script or serves its source. Folder-picker and external Open responses are stubbed to inspect targets; actual server/tunnel/IPC/clipboard/browser traffic is real.
 
@@ -97,6 +99,10 @@ npm.cmd run test:sharing:live
 
 The script prints fixture URLs and an external-check marker, waits up to three minutes for the operator's independent-network result, and then exercises stop/restart/quit. Same-PC HTTPS fetches/browser WebSockets do not prove an independent visitor network. The independent web tool could not access this run's temporary URLs; that check remains pending rather than being presented as a pass.
 
+For an automated same-PC regression, append `-- --skip-external-check`. The evidence explicitly marks independent visitor-network verification as not tested and proceeds through cleanup.
+
+The 2026-10-05 fix passed the full 171-test regression suite, then 49 focused tests after adding the Next development-font route, plus lint and production build. The final generated-fixture live run passed three simultaneous HTML/Vite/Next public pages/assets, Vite and Next.js 16.3.6 Turbopack browser reload without a dev-origin allowlist, no HTTP 403 browser resources, individual/all sharing stops, project restart, and manager-quit cleanup. All fixture tunnels and local servers stopped. Evidence is in `.test-artifacts/public-sharing-evidence.json`; this run explicitly skipped independent visitor-network verification. The initial fixture failed because its linked dependencies were outside Turbopack's inferred root; its retained evidence is `.test-artifacts/public-sharing-turbopack-link-error.json`. The fixture now sets only the filesystem root needed for those linked dependencies.
+
 ## Troubleshooting
 
 | Symptom | Action |
@@ -105,7 +111,7 @@ The script prints fixture URLs and an external-check marker, waits up to three m
 | Runtime missing/checksum error | Stop sharing, run setup:sharing, reopen the manager |
 | Connecting timeout | Check internet/provider availability and diagnostics; retry explicitly |
 | Pages load but assets/buttons/login fail | Review API addresses, dev-origin rules, cookies, redirects, and compatibility hints |
-| Next reload blocked | Review allowedDevOrigins for the intended hostname using official guidance |
+| Next reload blocked | Rebuild/reopen DevDock and create a fresh preview; inspect custom base paths, HMR, or application middleware if failures persist |
 | Link changed | Expected for a new Quick Tunnel session |
 | Stop failed | Retry Stop Sharing/Stop All Sharing; do not assume access ended while an owned tunnel remains |
 

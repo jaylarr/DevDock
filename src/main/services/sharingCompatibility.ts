@@ -27,7 +27,7 @@ export async function sharingCompatibility(project: ProjectMetadata): Promise<Co
     if (notes.size >= 10) break;
   }
   if (pending.length || limited) notes.add('Inspection reached its file/size limit. This is a compatibility hint, not a complete audit.');
-  if (project.kind === 'script' && project.framework === 'Next.js') notes.add('Next.js pages can load while live reload is blocked. The current public hostname may need allowedDevOrigins in next.config. This manager does not change your config.');
+  if (project.kind === 'script' && project.framework === 'Next.js') notes.add('Next.js live reload uses a bridge scoped to this preview hostname. Project configuration is unchanged. Custom authentication and redirects may still need a public URL allowlist.');
   return { summary: project.kind === 'static' ? `Static HTML · public link opens ${project.entryFile}.` : `${project.framework} · shares this project's verified HTTP server only.`,
     notes: [...notes, 'A separate backend port is not exposed by this link. Existing project forms and actions remain usable.'] };
 }

@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Persistence, emptyState } from '../src/main/services/persistence';
+import { themes } from '../src/shared/contracts';
 import { AppService } from '../src/main/services/appService';
 import { LogManager } from '../src/main/services/logManager';
 import { dispose, fixtureDirectory, packageFile, root } from './helpers';
@@ -44,11 +45,11 @@ it('retains actively managed excluded entries, blocks new starts and removes the
   expect(service.snapshot().projects).toHaveLength(0);
   active.mockRestore();
 });
-it('migrates legacy state to the approved release exclusion and preserves an explicitly empty list', async () => {
+it('migrates legacy state to generic defaults and preserves an explicitly empty list', async () => {
   const directory = await fixtureDirectory(); fixtures.push(directory);
   const persistence = new Persistence(directory);
   await writeFile(persistence.file, JSON.stringify({ version: 1, roots: [], projects: [], theme: 'dark' }));
-  expect((await persistence.load()).state.exclusions?.[0]).toContain('Automation Context Mapping');
+  expect((await persistence.load()).state.exclusions).toEqual([]);
   await persistence.save({ ...emptyState(), exclusions: [] });
   expect((await persistence.load()).state.exclusions).toEqual([]);
 });
@@ -58,14 +59,14 @@ it('serializes concurrent atomic saves and recovers a damaged primary from backu
   const persistence = new Persistence(directory);
   const initial = { ...emptyState(), roots: [root(directory)] };
   await persistence.save(initial);
-  await Promise.all([persistence.save({ ...initial, theme: 'dark' }), persistence.save({ ...initial, theme: 'light' })]);
-  expect((await persistence.load()).state.theme).toBe('light');
+  await Promise.all([persistence.save({ ...initial, settings: { ...initial.settings, appearance: { ...initial.settings.appearance, theme: 'dark' } } }), persistence.save({ ...initial, settings: { ...initial.settings, appearance: { ...initial.settings.appearance, theme: 'light' } } })]);
+  expect((await persistence.load()).state.settings.appearance.theme).toBe('light');
   await writeFile(persistence.file, 'invalid json');
   const restored = await persistence.load();
-  expect(restored.state.theme).toBe('dark'); expect(restored.warning).toContain('Recovered');
+  expect(restored.state.settings.appearance.theme).toBe('dark'); expect(restored.warning).toContain('Recovered');
   await persistence.save(restored.state);
   await writeFile(persistence.file, 'damaged again');
-  expect((await persistence.load()).state.theme).toBe('dark');
+  expect((await persistence.load()).state.settings.appearance.theme).toBe('dark');
 });
 it('keeps roots and cached metadata across launches, resets runtime, and retains missing projects', async () => {
   const directory = await fixtureDirectory(); fixtures.push(directory);
@@ -92,4 +93,15 @@ it('bounds logs by lines, bytes and global budget while stripping ANSI control s
   const all = [...logs.get('one'), ...logs.get('two')];
   expect(all.reduce((sum, item) => sum + Buffer.byteLength(item.text), 0)).toBeLessThanOrEqual(50);
   logs.clear('two'); expect(logs.get('two')).toEqual([]);
+});
+
+it.each(themes)('restores the $label appearance across application launches', async ({ value }) => {
+  const directory = await fixtureDirectory(); fixtures.push(directory);
+  const persistence = new Persistence(directory);
+  const service = new AppService(persistence, () => {});
+  await service.initialize();
+  await service.updateSettings({ appearance: { theme: value } });
+  const restored = new AppService(persistence, () => {});
+  await restored.initialize();
+  expect(restored.snapshot().settings.appearance.theme).toBe(value);
 });

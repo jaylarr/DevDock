@@ -20,6 +20,9 @@ async function until(predicate, timeout = 90000) {
 }
 async function state() { const result = await (await application.firstWindow()).evaluate(() => window.devManager.snapshot()); assert(result.ok, JSON.stringify(result)); return result.value; }
 async function action(method, id) { const result = await (await application.firstWindow()).evaluate(async ({ method, id }) => window.devManager[method](id), { method, id }); assert(result.ok, JSON.stringify(result)); }
+async function running(id) {
+  return until(async () => { const project = (await state()).projects.find((item) => item.id === id); if (project.status === 'error') throw new Error(`Fixture failed to start: ${project.name}: ${project.error}`); return project.status === 'running'; });
+}
 async function publicText(url, expected) {
   return until(async () => {
     try { const response = await fetch(url, { signal: AbortSignal.timeout(5000), redirect: 'manual' }); const text = await response.text(); return response.ok && text.includes(expected) ? text : false; } catch { return false; }
@@ -51,12 +54,22 @@ try {
   evidence.nextVersion = JSON.parse(await readFile(path.join(nextDependencies, 'next/package.json'), 'utf8')).version;
   await symlink(nextDependencies, path.join(next, 'node_modules'), 'junction');
   await writeFile(path.join(next, 'package.json'), JSON.stringify({ name: 'next-demo', scripts: { dev: 'node server.cjs' }, dependencies: { next: evidence.nextVersion } }));
-  await writeFile(path.join(next, 'server.cjs'), `const {spawn}=require('node:child_process'); const child=spawn(process.execPath,[${JSON.stringify(path.join(nextDependencies, 'next/dist/bin/next'))},'dev','--webpack','--hostname','127.0.0.1','--port',process.env.PORT],{stdio:'inherit'});child.on('exit',code=>process.exit(code??1));`);
+  await writeFile(path.join(next, 'server.cjs'), `const {spawn}=require('node:child_process'); const child=spawn(process.execPath,[${JSON.stringify(path.join(nextDependencies, 'next/dist/bin/next'))},'dev','--hostname','127.0.0.1','--port',process.env.PORT],{stdio:'inherit'});child.on('exit',code=>process.exit(code??1));`);
   await mkdir(path.join(next, 'app')); await mkdir(path.join(next, 'public'));
   await writeFile(path.join(next, 'app/layout.js'), 'export default function Layout({children}) { return <html><body>{children}</body></html>; }');
   await writeFile(path.join(next, 'app/client.js'), "'use client'; import {useEffect} from 'react'; export default function Client(){useEffect(()=>{document.body.dataset.nextReady='ready';},[]);return <span>Browser ready</span>;}\n");
   await writeFile(path.join(next, 'app/page.js'), "import Client from './client'; export default function Page() { return <><h1>Public Next fixture</h1><Client/></>; }");
-  await writeFile(path.join(next, 'next.config.js'), "module.exports = { allowedDevOrigins: ['*.trycloudflare.com'] };\n");
+  // Turbopack requires linked runtime dependencies to be inside its filesystem root.
+  // Only generated fixture code and third-party modules are imported; no existing app is launched.
+  let turboRoot = next;
+  while (true) {
+    const relative = path.relative(turboRoot, nextDependencies);
+    if (!relative.startsWith('..') && !path.isAbsolute(relative)) break;
+    const parent = path.dirname(turboRoot);
+    if (parent === turboRoot) throw new Error('The fixture and Next runtime must share a filesystem root.');
+    turboRoot = parent;
+  }
+  await writeFile(path.join(next, 'next.config.js'), `module.exports = { turbopack: { root: ${JSON.stringify(turboRoot)} } };\n`);
   await writeFile(path.join(next, 'public/fixture.txt'), 'Public Next asset');
   const env = { ...process.env, LDM_DATA_DIR: data, NEXT_TELEMETRY_DISABLED: '1' }; delete env.ELECTRON_RUN_AS_NODE;
   application = await electronAutomation.launch({ executablePath: await electronPath(), args: ['.'], cwd: process.cwd(), env });
@@ -70,7 +83,7 @@ try {
   const registered = (await state()).projects;
   const htmlProject = registered.find((project) => project.name === 'html-demo');
   console.log('Starting generated HTML/Vite/Next public fixtures.');
-  await action('start', htmlProject.id); await until(async () => (await state()).projects.find((project) => project.id === htmlProject.id).status === 'running');
+  await action('start', htmlProject.id); await running(htmlProject.id);
   const row = page.locator('.project-row').filter({ has: page.getByRole('button', { name: 'View html-demo', exact: true }) });
   await row.getByRole('button', { name: 'Share Online', exact: true }).click();
   await page.getByRole('dialog', { name: 'Share html-demo online?' }).waitFor();
@@ -79,7 +92,7 @@ try {
   await row.getByRole('button', { name: 'Share Online', exact: true }).click();
   await page.getByRole('button', { name: 'Start sharing', exact: true }).click();
   for (const project of registered.filter((project) => project.id !== htmlProject.id)) {
-    await action('start', project.id); await until(async () => (await state()).projects.find((item) => item.id === project.id).status === 'running');
+    await action('start', project.id); await running(project.id);
     await action('share', project.id);
   }
   const sharing = await until(async () => { const projects = (await state()).projects; if (projects.some((project) => project.sharing.status === 'error')) throw new Error(JSON.stringify(projects.map((project) => ({ name: project.name, sharing: project.sharing, error: project.error })))); return projects.every((project) => project.sharing.status === 'sharing') ? projects : false; });
@@ -105,13 +118,15 @@ try {
   await application.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(850, 600));
   await page.screenshot({ path: path.join(base, 'sharing-small.png') });
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight));
-  await page.evaluate(() => window.devManager.theme('light')); await page.screenshot({ path: path.join(base, 'sharing-light.png') });
-  await page.evaluate(() => window.devManager.theme('dark')); await page.screenshot({ path: path.join(base, 'sharing-dark.png') });
+  await page.evaluate(() => window.devManager.updateSettings({ appearance: { theme: 'light' } })); await page.screenshot({ path: path.join(base, 'sharing-light.png') });
+  await page.evaluate(() => window.devManager.updateSettings({ appearance: { theme: 'dark' } })); await page.screenshot({ path: path.join(base, 'sharing-dark.png') });
   evidence.results.push('Confirmation/cancel, compatibility, copy/open public URL, small-window layout, themes passed in Electron. Open browser was stubbed to inspect its target.');
   // Real browser network/WS checks; this browser still runs on the same PC, not an independent network.
   browser = await chromium.launch({ channel: 'msedge' });
   const visit = await browser.newPage(); const sockets = [];
   evidence.browserNotes = [];
+  evidence.browserResponses = [];
+  visit.on('response', (response) => { if (response.status() >= 400 && evidence.browserResponses.length < 30) evidence.browserResponses.push({ status: response.status(), path: new URL(response.url()).pathname, method: response.request().method() }); });
   visit.on('console', (message) => { if (evidence.browserNotes.length < 30 && ['error', 'warning'].includes(message.type())) evidence.browserNotes.push(message.text().slice(0, 800)); });
   visit.on('pageerror', (error) => { if (evidence.browserNotes.length < 30) evidence.browserNotes.push(error.message.slice(0, 800)); });
   visit.on('websocket', (socket) => { socket.on('framereceived', () => sockets.push(socket.url())); });
@@ -125,13 +140,16 @@ try {
   await until(() => sockets.some((url) => new URL(url).host === new URL(nextUrl).host), 30000);
   await writeFile(path.join(next, 'app/page.js'), "import Client from './client'; export default function Page() { return <><h1>Updated public Next fixture</h1><Client/></>; }");
   await visit.getByRole('heading', { name: 'Updated public Next fixture', exact: true }).waitFor({ timeout: 30000 });
-  evidence.results.push('Next public browser reload passed.');
+  evidence.results.push('Next Turbopack public browser reload passed without an allowedDevOrigins config change.');
+  assert(!evidence.browserResponses.some((response) => response.status === 403), JSON.stringify(evidence.browserResponses));
+  evidence.results.push('No browser resource requests returned HTTP 403.');
   await browser.close(); browser = undefined;
   console.log(`LIVE_URLS ${JSON.stringify(evidence.urls.map(({ name, url }) => ({ name, url })))}`);
   console.log(`EXTERNAL_CHECK_MARKER ${path.join(fixture, 'external-check.json')}`);
   // Allow the calling agent to check these fixture URLs through an independent tool, then signal continuation.
   const marker = path.join(fixture, 'external-check.json');
-  await until(async () => { try { return JSON.parse(await readFile(marker, 'utf8')); } catch { return false; } }, 180000).then((result) => evidence.external = result);
+  if (process.argv.includes('--skip-external-check')) evidence.external = { status: 'not-tested', reason: 'Independent visitor-network check explicitly skipped.' };
+  else await until(async () => { try { return JSON.parse(await readFile(marker, 'utf8')); } catch { return false; } }, 180000).then((result) => evidence.external = result);
   await row.getByRole('button', { name: 'Stop Sharing', exact: true }).click();
   await until(async () => (await state()).projects.find((project) => project.id === htmlProject.id).sharing.status === 'disabled');
   await stoppedPublic(htmlUrl, 'Public HTML fixture'); await publicText(htmlProject.localUrl ?? evidence.urls.find((item) => item.name === 'html-demo').local, 'Public HTML fixture');

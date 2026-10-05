@@ -22,13 +22,11 @@ Sharing also requires Windows x64 in `scripts/setup-sharing.mjs:8` and `src/main
 
 Action: advertise **native Windows x64 preview** now. Before adding support, implement and test OS-specific listener ownership, process ancestry/group cleanup, Node/npm resolution, and cloudflared platform/architecture pins; review renderer path handling and macOS window lifecycle. Run real start/stop/restart/quit and sharing tests on each supported architecture. A platform switch or Electron package alone is insufficient.
 
-### 2. Personal installation data is embedded in application defaults — high publication priority
+### 2. Personal installation data in application defaults — resolved locally 2026-10-03
 
-Evidence: `src/main/services/persistence.ts:9–17` includes an absolute author-workspace folder in `initialExclusions`; `tests/state.test.ts:47–54` expects that personal default. Fresh installations and legacy state without exclusions inherit it and display it in Discovery settings.
+The original audit found a personal absolute exclusion in source defaults and a test expecting it. Settings implementation removes that source default: fresh installations and legacy records without exclusions now start with an empty list. Explicit saved exclusions are preserved, including those intentionally configured on an existing installation.
 
-Action: generalize the public default to an empty list or a reviewed generic policy. Preserve already-saved user exclusions rather than silently removing them. Replace the migration test's personal-name assertion with a generic policy assertion. This audit leaves that product change for the next implementation step and avoids repeating the actual path in publication drafts/screenshots.
-
-The capture script explicitly seeds an empty exclusion list in isolated state. The screenshots contain no actual user catalog entries. The revised README no longer identifies the author's project folder.
+Evidence: `src/main/services/persistence.ts` defines generic v3 defaults; `tests/state.test.ts` verifies empty legacy defaults; `tests/settings.test.ts` and `scripts/settings-smoke.mjs` verify existing exclusion preservation and migration backups. Settings uses isolated fictional catalogs for desktop acceptance. This local resolution does not establish public repository/history cleanup or fresh-machine acceptance.
 
 ### 3. No project license or release destination — publication decision pending
 
@@ -75,7 +73,7 @@ Action: center the native dialog explicitly and verify keyboard focus, dismissal
 | Dependencies | Exact direct versions and lockfile; current npm audit reports zero known vulnerabilities. This is time-specific and does not prove absence of unknown issues or binary-level advisories. |
 | Governance | No CI or release packaging found. Historical plans/release drafts contain future ideas and must not be treated as implemented capabilities. |
 
-A pattern scan of the non-generated source/docs found no matching private-key blocks, common OpenAI/GitHub/Google token patterns, or JWT-like strings. This is a narrow working-tree check, not full secret detection or a history audit. The personal exclusion remains a confirmed privacy issue despite that scan. Full Git-history review, release-archive inspection, dependency/binary notices, and fresh-machine setup remain release tasks.
+A pattern scan of the non-generated source/docs found no matching private-key blocks, common OpenAI/GitHub/Google token patterns, or JWT-like strings. This is a narrow working-tree check, not full secret detection or a history audit. The personal default was a confirmed privacy issue at audit time and has since been removed from current source; repository-history review remains separate. Full Git-history review, release-archive inspection, dependency/binary notices, and fresh-machine setup remain release tasks.
 
 ## Current verification
 
@@ -101,7 +99,7 @@ Earlier `docs/public-sharing.md` and `.test-artifacts/public-sharing-evidence.js
 
 ## Publication checklist
 
-- [ ] Generalize the machine-specific default exclusion and its tests.
+- [x] Generalize the machine-specific default exclusion and its tests (local Settings implementation, 2026-10-03).
 - [ ] Choose a project license/reuse policy; add repository, maintainer and reporting links.
 - [ ] Commit the complete reviewed implementation: several v0.3.0 runtime files are currently untracked. Publishing only the existing HEAD would omit current functionality.
 - [ ] Review the complete source/history for private data and inspect the exact release archive.

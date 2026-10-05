@@ -106,10 +106,10 @@ describe('saved state and reclassification', () => {
     const folder = await directory(); const owner = root(folder);
     const legacy = { version: 1, roots: [owner], projects: [{ id: projectId(folder), name: 'old', path: folder, rootId: owner.id, slug: slug('old', folder), devScript: 'vite', manager: 'npm', framework: 'Vite', missing: false }], exclusions: [], theme: 'dark' };
     const persistence = new Persistence(folder); await writeFile(persistence.file, JSON.stringify(legacy));
-    const loaded = await persistence.load(); expect(loaded.state.version).toBe(2); expect(loaded.state.projects[0]?.kind).toBe('script'); expect(loaded.state.exclusions).toEqual([]);
-    await persistence.save(loaded.state); await persistence.save({ ...loaded.state, theme: 'light' });
+    const loaded = await persistence.load(); expect(loaded.state.version).toBe(3); expect(loaded.state.projects[0]?.kind).toBe('script'); expect(loaded.state.exclusions).toEqual([]);
+    await persistence.save(loaded.state); await persistence.save({ ...loaded.state, settings: { ...loaded.state.settings, appearance: { ...loaded.state.settings.appearance, theme: 'light' } } });
     expect(JSON.parse(await readFile(`${persistence.file}.v1.bak`, 'utf8'))).toEqual(legacy);
-    expect((await persistence.load()).state.theme).toBe('light');
+    expect((await persistence.load()).state.settings.appearance.theme).toBe('light');
   });
   it.each(['../secret.html', 'C:\\secret.html', '.secret.html', 'index.html:stream', 'index.js'])('rejects unsafe persisted entry %s', async (entryFile) => {
     const folder = await directory(); const owner = root(folder); const persistence = new Persistence(folder);
@@ -131,7 +131,7 @@ describe('saved state and reclassification', () => {
     await packageFile(folder, { scripts: { dev: 'vite' } }); await service.scan();
     expect(service.snapshot().projects).toHaveLength(1); expect(service.snapshot().projects[0]?.kind).toBe('script');
   });
-  it('preserves a recovered v1 backup before writing v2 state', async () => {
+  it('preserves a recovered v1 backup before writing v3 state', async () => {
     const folder = await directory(); const persistence = new Persistence(folder);
     const legacy = { version: 1, roots: [], projects: [], exclusions: [], theme: 'dark' };
     await writeFile(persistence.file, 'broken'); await writeFile(`${persistence.file}.bak`, JSON.stringify(legacy));

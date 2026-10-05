@@ -25,7 +25,11 @@
     "montage:finalize": "node project-demo/scripts/finalize.mjs",
     "montage:qa": "node project-demo/scripts/qa.mjs",
     "montage:clean": "node project-demo/scripts/clean.mjs",
-    "montage:check": "node node_modules/typescript/bin/tsc --project project-demo/tsconfig.json --noEmit"
+    "montage:check": "node node_modules/typescript/bin/tsc --project project-demo/tsconfig.json --noEmit",
+    "test:settings": "node scripts/settings-smoke.mjs",
+    "test:projects": "node scripts/projects-smoke.mjs",
+    "test:activity": "node scripts/external-activity-smoke.mjs",
+    "test:external-servers": "node scripts/external-servers-smoke.mjs"
   },
   "engines": {
     "node": ">=24"

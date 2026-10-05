@@ -16,6 +16,7 @@ Both drafts describe public release as preparation, rather than claiming the rep
 | [01-dashboard-light.png](../media/01-dashboard-light.png) | One dashboard for local projects. Fictional demo workspace, light appearance. |
 | [02-dashboard-dark.png](../media/02-dashboard-dark.png) | The same demo workspace in dark mode. |
 | [03-project-details.png](../media/03-project-details.png) | Project controls, a verified local URL, and real output from a generated Vite demo. |
+| [05-settings-appearance.png](../media/05-settings-appearance.png) | Saved appearance and list preferences in the new Settings destination; fictional stopped catalog. |
 | [04-sharing-confirmation.png](../media/04-sharing-confirmation.png) | Review access and compatibility before starting a temporary public preview. No tunnel was started for this screenshot. |
 
 Use 01 as the first Facebook image; use 02 as the first LinkedIn image if you prefer the dark appearance. Attach 03 next to show practical controls. 04 is optional and shows the current real dialog layout, including its placement at the window's top-left. The audit records that layout issue.
@@ -45,3 +46,7 @@ node scripts/capture-showcase.mjs
 Sharing setup prepares the optional binary so the confirmation control is available; it does not publish anything. Capture requires working Windows CIM/process cleanup. It overwrites only the four showcase images and metadata, creates its own temporary demo data, and never reads your normal catalog. No persistent mock project installation is needed.
 
 Review regenerated images and captions before posting. Keep `.test-artifacts/`, normal user data, logs, and raw local inspection reports out of publication assets.
+
+## Settings capture
+
+Image 05 was added on 2026-10-03 by the isolated Settings acceptance run, with thirteen fictional HTML projects, all stopped. It is a real Electron capture with a generic root name and no visible private paths. It is generated separately by `npm.cmd run test:settings`; reviewed output from `.test-artifacts/settings-appearance-light.png` is copied to `docs/media/05-settings-appearance.png`. The other four showcase captures continue to use `capture-showcase.mjs`.

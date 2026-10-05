@@ -18,6 +18,13 @@ export interface TunnelProvider {
   availability(): Promise<SharingAvailability>;
   start(origin: string, events: TunnelEvents, signal: AbortSignal): Promise<TunnelHandle>;
 }
+export function localOrigin(value: string): string | undefined {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) || !url.port || url.username || url.password) return;
+    return `${url.protocol}//${url.host}`;
+  } catch { return; }
+}
 export function publicOrigin(value: string): string | undefined {
   try {
     const url = new URL(value);
