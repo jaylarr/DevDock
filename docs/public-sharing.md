@@ -1,12 +1,12 @@
 # Public previews in DevDock v0.3.0
 
-Prepared: 2026-10-02 (Asia/Taipei). Local release draft; publication and packaging are separate.
+Prepared: 2026-10-02; updated: 2026-10-05 (Asia/Taipei). Public Windows source-build preview; an installer is not available.
 
 ## Using it
 
 Restart the manager after upgrading its main/preload build. Your projects are never shared automatically.
 
-1. Start a project and wait for **Running**.
+1. Start a project through DevDock and wait for **Running**.
 2. Click **Share Online** in its row or expanded details.
 3. Review the compatibility hints/public-access notice and click **Start sharing**.
 4. Expand details for **Copy Public Link**, **Open Public Link**, and **Stop Sharing**.
@@ -15,6 +15,27 @@ Restart the manager after upgrading its main/preload build. Your projects are ne
 **Stop Sharing** preserves the local server. **Stop All Sharing** stops every public preview owned by this manager while preserving local servers. Stopping/restarting a project ends its session. Closing the manager stops its tunnels and servers; reopening restores neither. Retry is manual after persistent connection failure.
 
 Anyone with the link can access routes/actions already served by the project, including accessible admin/debug endpoints. Preview intent does not make a site read-only. The PC, manager, server, and internet connection must remain available.
+
+## Requirements and remaining limitations
+
+The current published source includes the Next.js preview-origin bridge and improved Windows ownership checker. The earlier Next.js dev-asset/live-reload rejection and ownership-query race have fixes in this version. Sharing can still fail when a project's own configuration, local runtime, or network does not meet these requirements:
+
+| Situation | Expected behavior / next step |
+| --- | --- |
+| macOS/Linux, or another Windows architecture | Sharing requires native Windows x64. macOS/Linux are unsupported; ARM64/x86 are not validated. |
+| Sharing runtime missing or checksum mismatch | Run `npm.cmd run setup:sharing` and reopen DevDock. Local project controls can work without the optional runtime. |
+| Project opened in an editor/browser or marked **Running elsewhere** | Sharing requires a verified server started through DevDock. Stop the external server, start it through DevDock, then wait for **Running**. |
+| pnpm/Yarn/Bun project, missing dependencies, or no `dev` script | Package execution supports npm with an existing `dev` script. Install dependencies using the project's instructions; DevDock does not install them or switch Node versions. Standalone HTML is also supported. |
+| Frontend calls `localhost` / another local port | The visitor's browser uses the visitor's computer for those URLs. One link exposes one verified HTTP origin; use a project-level same-origin proxy or an appropriate public API for a separate backend. |
+| Login, OAuth callbacks, cookies, or redirects fail | Check the project's callback/origin allowlists and HTTPS-cookie configuration for the temporary hostname. The preview bridge preserves application authentication headers rather than configuring authentication for you. |
+| Custom HMR, WebSockets, or another framework/version | Check the project's own development-server configuration. Controlled HTML/Vite/Next fixtures do not prove every application's compatibility. |
+| SSE / EventSource streaming | Quick Tunnels do not support SSE. Use an alternative hosting/tunnel approach for features that require it. |
+| HTTP 429 under load | Quick Tunnels allow up to 200 in-flight requests per tunnel. Reduce concurrency or use hosting suited to the workload. |
+| PC sleeps, server stops/restarts, or internet becomes unavailable | The preview may become unavailable. Persistent connection failure or failed ownership verification ends sharing; resolve the cause and retry manually. Normal stop/restart/quit ends the session, and a new session gets a new hostname. |
+
+Quick Tunnels are temporary development previews with no uptime guarantee. See the [official provider limits](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/). An active link establishes a connected tunnel, not successful application workflows or guaranteed visitor reachability. Compatibility hints can miss issues and do not change project source/configuration.
+
+Acceptance on another Windows machine and an independent visitor network remains pending. Existing controlled public-traffic evidence comes from the development PC; see [validation evidence](#validation-evidence). Forced termination, power loss, sleep/resume, and physical network-loss recovery are not guaranteed.
 
 ## Runtime setup
 
@@ -67,7 +88,7 @@ Start revalidates registration, local listening PID ownership, and process gener
 
 Cancellation ignores late events and stops late-spawned handles. Project Stop blocks sharing, stops the tunnel first, then stops its server. Crash/exit clears the link and stops sharing. Cleanup failures stay visible/retryable; a root with an owned tunnel cannot be removed even after server exit. Quit attempts all cleanup and aggregates failures. Overlapping Stop All requests share one cleanup operation.
 
-Diagnostics use bounded in-memory project logs with a `[Sharing]` prefix. Copied logs may contain public links. Session PIDs, links, timestamps, errors, and processes are never persisted. SavedState stays version 2; no database/migration is added.
+Diagnostics use bounded in-memory project logs with a `[Sharing]` prefix. Copied logs may contain public links. Session PIDs, links, timestamps, errors, and processes are never persisted. Current settings use SavedState version 3 with v1/v2 migration; sharing sessions are not restored.
 
 Forced app termination, power loss, sleep/resume, independent descendants, and physically disconnected network behavior are not guaranteed by an OS job object; none is added here.
 

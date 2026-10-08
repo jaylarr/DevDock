@@ -80,7 +80,7 @@ try {
  const stale=await page.evaluate(({id,servers})=>window.devManager.stopExternal(id,servers),{id,servers:identities.map(server=>({...server,ownerStartedAt:new Date(0).toISOString()}))}); assert.equal(stale.ok,false); assert.match(stale.error,/process changed/);
  const malformed=await page.evaluate(({id,servers})=>window.devManager.stopExternal(id,servers),{id,servers:identities.map(server=>({...server,port:0}))}); assert.equal(malformed.ok,false); assert.match(malformed.error,/Invalid/);
  const inventory=await serverProcesses(), owner=inventory.find(process=>process.pid===current.pid); assert(owner);
- await assert.rejects(stopServerProcesses([{...owner,startedAt:new Date(0).toISOString()}]),/could not be stopped safely/); assert((await(await fetch(url)).text()).includes('updated'));
+ await assert.rejects(stopServerProcesses([{...owner,startedAt:new Date(0).toISOString()}]),/process changed/); assert((await(await fetch(url)).text()).includes('updated'));
  const terminalPid=(await json(ready)).terminalPid, terminalOwner=inventory.find(process=>process.pid===terminalPid); assert(terminalOwner);
  await page.setViewportSize({width:850,height:600}); await page.getByRole('button', {name:'View external-vite',exact:true}).click();
  await page.getByRole('button',{name:'Stop external server',exact:true}).click();

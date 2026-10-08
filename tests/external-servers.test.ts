@@ -3,7 +3,7 @@ import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { ExternalServers, matchServers, parseListeners, planExternalStop, readOutput, type ServerProcess } from '../src/main/services/externalServers';
-import { readStopTargets } from '../src/main/services/externalServerStop';
+import { readStopTargets, stopFailure } from '../src/main/services/externalServerStop';
 import type { ActivityReport } from '../src/main/services/externalActivity';
 import { AppService } from '../src/main/services/appService';
 import { Persistence } from '../src/main/services/persistence';
@@ -108,6 +108,14 @@ it('ignores recycled parent PIDs and refuses a process tree serving another regi
 it('rejects malformed external stop requests and arbitrary process payloads', () => {
   expect(readStopTargets([target])).toEqual([target]);
   for (const input of [undefined, [], Array(65).fill(target), [{ ...target, pid: 0 }], [{ ...target, port: 65536 }], [{ ...target, ownerStartedAt: 'bad' }], [{ ...target, command: 'kill' }]]) expect(() => readStopTargets(input)).toThrow('Invalid');
+});
+
+it('reports bounded native failure stages without exposing raw PowerShell output', () => {
+  expect(stopFailure(JSON.stringify({ ok: false, stage: 'terminate', pid: 40, reason: 'native-error', nativeCode: 5 }), 1)).toContain('Windows denied access while terminating the external process (PID 40). Windows error 5.');
+  expect(stopFailure(JSON.stringify({ ok: false, stage: 'identity', pid: 40, reason: 'identity-changed' }), 1)).toContain('process changed (PID 40)');
+  expect(stopFailure(JSON.stringify({ ok: false, stage: 'wait', pid: 40, reason: 'exit-timeout' }), 1)).toContain('did not exit after termination');
+  expect(stopFailure('private command line or environment value', 1)).toBe('The Windows server stop helper failed (exit code 1). Refresh to check the server state.');
+  expect(stopFailure(JSON.stringify({ ok: false, stage: 'private text', pid: 40 }), null)).not.toContain('private text');
 });
 
 it('stops through the service with a fresh check, updates state, preserves activity, and keeps external Restart disabled', async () => {

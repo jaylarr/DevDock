@@ -29,7 +29,8 @@
     "test:settings": "node scripts/settings-smoke.mjs",
     "test:projects": "node scripts/projects-smoke.mjs",
     "test:activity": "node scripts/external-activity-smoke.mjs",
-    "test:external-servers": "node scripts/external-servers-smoke.mjs"
+    "test:external-servers": "node scripts/external-servers-smoke.mjs",
+    "test:external-stop": "node scripts/external-stop-native-smoke.mjs"
   },
   "engines": {
     "node": ">=24"

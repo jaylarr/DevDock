@@ -2,6 +2,8 @@
 
 Audited 2026-10-02 (Asia/Taipei), working-tree version 0.3.0. Scope: the current source tree, supporting scripts, tests, dependency manifest/lockfile, documentation, and publication assets. This is a source review plus current Windows validation, not certification of every device or project.
 
+**Status update, 2026-10-05:** [Public main at `448f27c`](https://github.com/jaylarr/DevDock/tree/448f27cdb16f9d483fd1fc43dc7cfa7c7441f56e) includes the Next.js preview bridge, improved Windows ownership queries, and generic fresh-install defaults. The earlier finding that sharing fixes were unpublished no longer applies. The original audit and test counts below are historical. Fresh-machine acceptance, independent visitor-network acceptance, live-test reproducibility, packaging, and the project-license decision remain outstanding. See the current [README limitations](../README.md#limitations-and-roadmap) and [sharing requirements](public-sharing.md#requirements-and-remaining-limitations).
+
 ## Verdict
 
 **Suitable to present as a Windows development preview, with explicit limits. Not compatible with macOS/Linux as a complete project manager. Public repository preparation still has follow-ups.**

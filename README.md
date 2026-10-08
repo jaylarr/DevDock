@@ -4,7 +4,7 @@ Your local projects. One dock.
 
 A desktop dashboard for finding, starting, stopping, and inspecting local development projects. Add the folders where your projects live, then manage their development servers from one window.
 
-**v0.3.0 is a Windows source-build preview. macOS and Linux are currently unsupported. An installer is not available.** Public release preparation is in progress; see the [publication audit](docs/publication-audit.md) for remaining work and tested limits.
+**v0.3.0 is a Windows source-build preview. macOS and Linux are currently unsupported. An installer is not available.** Review the [known limitations](#limitations-and-roadmap) and [sharing requirements](#sharing-requirements-and-limitations) before using it. The [publication audit](docs/publication-audit.md) records remaining validation and release work.
 
 ![DevDock with fictional demo projects](docs/media/01-dashboard-light.png)
 
@@ -147,7 +147,7 @@ The rest of the project's package configuration and dependencies still apply. Th
 
 Simple `vite` and `next dev` scripts get temporary loopback/port arguments. Custom scripts get `PORT` and `HOST` process variables, but must honor them or otherwise print a usable loopback HTTP URL with an explicit port. Standard npm scripts run with your own user permissions. Avoid registering untrusted projects.
 
-Framework labels are detection hints. Vite has real local regression coverage; generated Vite/Next previews have earlier controlled sharing evidence. Detection of React, Astro, Nuxt, Angular, SvelteKit, or Node does not guarantee every application's launch/auth/API behavior. Advanced monorepo orchestration, Node version switching, and universal custom-script port handling are pending.
+Framework labels are detection hints. Vite has real local regression coverage; generated HTML/Vite/Next previews have controlled sharing evidence, including Next.js 16.3.6 live reload through the preview bridge. Detection of React, Astro, Nuxt, Angular, SvelteKit, or Node does not guarantee every application's launch/auth/API behavior. Advanced monorepo orchestration, Node version switching, and universal custom-script port handling are pending.
 
 ## Static HTML sites
 
@@ -164,7 +164,7 @@ The helper supports ordinary web assets and GET/HEAD requests. It blocks directo
 ## Temporary public previews
 
 1. Prepare the optional sharing runtime and reopen the manager.
-2. Start a project and wait for **Running**.
+2. Start a project through DevDock and wait for **Running**.
 3. Choose **Share Online** and review the access notice and compatibility hints.
 4. Choose **Start sharing**, then expand project details for **Copy Public Link**, **Open Public Link**, or **Stop Sharing**.
 5. Share other running projects independently if needed; each session gets its own URL.
@@ -173,9 +173,22 @@ The helper supports ordinary web assets and GET/HEAD requests. It blocks directo
 
 Anyone with the link can access that project's available web pages and actions. The app does not add visitor authentication or make forms/admin routes read-only. Your PC, manager, local server, and internet connection must stay available.
 
-Cloudflare Quick Tunnels are temporary development previews with changing hostnames, no uptime guarantee, a 200 in-flight-request limit, and no Server-Sent Events support. See the [official provider limits](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/).
+### Sharing requirements and limitations
 
-Browser-side `localhost` API URLs point to the visitor's computer. Separate API ports, OAuth callback allowlists, cookies, and custom HMR may need changes in the project. Next.js dev assets/live reload use a bridge scoped to the current preview hostname. Compatibility hints are bounded read-only inspections, not complete audits. The manager does not modify your project's configuration. See the [sharing guide](docs/public-sharing.md) for details and evidence boundaries.
+The current source includes the Next.js preview-origin bridge and improved Windows ownership checks. These address the previously observed Next.js dev-resource/live-reload rejection and ownership-query race. They do not establish compatibility with every project or network.
+
+| Requirement / limit | What it means for you |
+| --- | --- |
+| Optional sharing runtime | Run `npm.cmd run setup:sharing`, then reopen DevDock. Missing/corrupt runtimes disable sharing; local controls remain available. |
+| Server started through DevDock | Opening a project or seeing **Running elsewhere** is insufficient. Stop its external server, start it through DevDock, and wait for **Running** before sharing. |
+| One verified HTTP origin per link | A separate backend port is not exposed. Browser-side `localhost`/`127.0.0.1` URLs point to the visitor's computer; the project may need a same-origin proxy or public API. |
+| Login, redirects, and cookies | A temporary hostname may need callback/origin allowlist or HTTPS-cookie changes in your project. DevDock does not configure those integrations. |
+| Framework-specific behavior | Next.js dev assets/live reload use the preview bridge. Custom HMR, custom WebSockets, and other framework versions still need project-specific checks. |
+| SSE streaming | Cloudflare Quick Tunnels do not support Server-Sent Events. Features using SSE, including some AI streaming, need another hosting/tunnel approach. |
+| Temporary availability | Your PC, DevDock, server, and internet must stay available. Hostnames change between sessions, and there is no uptime guarantee. More than 200 concurrent in-flight requests can return HTTP 429. |
+| Connection and ownership checks | Sharing ends if the local server stops/restarts, ownership cannot be verified, or a connection failure persists. Resolve the cause and retry manually. |
+
+Controlled HTML/Vite/Next previews were tested from the development PC. Acceptance on another Windows machine and an independent visitor network remains pending. Compatibility hints are bounded read-only inspections, not complete audits; **Running** or an active public link does not prove every route, login, API, or action works. DevDock does not modify project configuration. See the [sharing guide](docs/public-sharing.md) and [official provider limits](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/).
 
 ## Settings
 
@@ -298,7 +311,16 @@ Architecture: [module guide](docs/architecture.md). Feature references: [HTML su
 
 ## Limitations and roadmap
 
-Current limitations include Windows-only ownership verification, x64-only sharing, npm-only package execution, no installer, no Node-version switching, no automatic project dependency installation, no permanent hosting, and no guaranteed abnormal-exit cleanup.
+| Area | Current limitation |
+| --- | --- |
+| Platforms | Native Windows x64 is the preview target. macOS/Linux are unsupported; other Windows architectures, WSL, containers, and network drives are not validated. |
+| Project execution | npm projects need an existing `dev` script and installed dependencies. pnpm/Yarn/Bun execution adapters, Node-version switching, and automatic project dependency installation are unavailable. |
+| Custom scripts / monorepos | Scripts must honor the selected binding/port or report a usable loopback HTTP URL. Framework detection does not guarantee launch or application compatibility. Advanced monorepo orchestration is pending. |
+| Static HTML | GET/HEAD web assets only; no PHP/backend execution, SPA routing fallback, or live reload. |
+| Installation / updates | Source build only, with explicit initial downloads. No installer or automatic app/runtime updates. |
+| Public previews | Temporary sharing of a DevDock-managed server, with the [requirements and limits above](#sharing-requirements-and-limitations). No permanent hosting or added visitor authentication. |
+| Process cleanup | Normal stop/quit is covered; forced termination, power loss, sleep/resume, and independent descendants have no guaranteed cleanup. |
+| Validation coverage | Controlled tests on the development PC are not acceptance on every machine/network or proof of every project's functionality. Fresh-machine and independent visitor-network acceptance remain pending. |
 
 Possible future work includes macOS/Linux ownership and cleanup adapters, more package managers, validated packaging, named local URLs, bulk startup, and stronger process lifecycle recovery. These items are not current features or release-date promises.
 
@@ -306,4 +328,4 @@ Possible future work includes macOS/Linux ownership and cleanup adapters, more p
 
 A project license has **not yet been selected**. Dependency licenses do not grant a license to this application's source. Publication preparation must include that decision; this preview should not be described as licensed open-source software yet. Redistributing Electron/cloudflared binaries also needs their applicable license notices.
 
-When reporting a problem, include your OS/architecture, Node/npm and app versions, framework/package manager, exact steps, expected behavior, and redacted logs. Never include credentials, private project paths, personal app state, or unreviewed public preview links. A repository URL and maintainer contact should be added when the public destination is chosen.
+When reporting a problem in the [public repository](https://github.com/jaylarr/DevDock), include your OS/architecture, Node/npm and app versions, framework/package manager, exact steps, expected behavior, and redacted logs. Never include credentials, private project paths, personal app state, or unreviewed public preview links.
